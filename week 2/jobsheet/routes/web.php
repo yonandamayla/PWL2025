@@ -108,13 +108,26 @@ use App\Http\Controllers\PhotoController;
 
 // Route::resource('photos', PhotoController::class);
 
-Route::resource('photos', PhotoController::class)->only([
-    'index',
-    'show'
-]);
-Route::resource('photos', PhotoController::class)->except([
-    'create',
-    'store',
-    'update',
-    'destroy'
-]);
+// Route::resource('photos', PhotoController::class)->only([
+//     'index',
+//     'show'
+// ]);
+// Route::resource('photos', PhotoController::class)->except([
+//     'create',
+//     'store',
+//     'update',
+//     'destroy'
+// ]);
+
+// Membuat View
+// Route::get('/greeting', function () {
+//     return view('hello', ['name' => 'Yonanda Mayla']);
+// });
+
+// View dalam direktori
+// Route::get('/greeting', function () {
+//     return view('blog.hello', ['name' => 'Yonanda Mayla']);
+// });
+
+// Route greeting menampilkan view dalam controller
+Route::get('/greeting', [WelcomeController::class, 'greeting']);
