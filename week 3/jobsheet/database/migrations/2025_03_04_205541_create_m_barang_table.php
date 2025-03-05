@@ -15,12 +15,11 @@ return new class extends Migration
             $table->unsignedBigInteger('barang_id')->autoIncrement();
             $table->unsignedBigInteger('kategori_id')->index();
             $table->string('barang_kode', 20)->unique();
-            $table->string('barang_nama', 100);
+            $table->string('nama_barang', 100); // Pastikan kolom ini ada
             $table->integer('harga_beli', false, true); // harga beli dengan tipe integer
             $table->integer('harga_jual', false, true); // harga jual dengan tipe integer
             $table->timestamps();
 
-            // Mendefinisikan foreign key kategori_id yang merujuk ke kolom kategori_id di tabel m_kategori
             $table->foreign('kategori_id')->references('kategori_id')->on('m_kategori');
         });
     }
