@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        schema::create('m_level', function (Blueprint $table) {
-            $table->id('level_id');
+        Schema::create('m_level', function (Blueprint $table) {
+            $table->unsignedBigInteger('level_id', 20)->autoIncrement();
             $table->string('level_kode', 10)->unique();
             $table->string('level_nama', 100);
             $table->timestamps();
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('level');
+        Schema::dropIfExists('m_level');
     }
 };
