@@ -1,29 +1,18 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace Database\Seeders;
 
-return new class extends Migration
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class LevelSeeder extends Seeder
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function run(): void
     {
-        Schema::create('m_level', function (Blueprint $table) {
-            $table->unsignedBigInteger('level_id', 20)->autoIncrement();
-            $table->string('level_kode', 10)->unique();
-            $table->string('level_nama', 100);
-            $table->timestamps();
-        });
+        DB::table('m_level')->insert([
+            ['level_id' => 1, 'level_kode' => 'ADM', 'level_nama' => 'Administrator'],
+            ['level_id' => 2, 'level_kode' => 'MNG', 'level_nama' => 'Manager'],
+            ['level_id' => 3, 'level_kode' => 'STF', 'level_nama' => 'Staff/Kasir'],
+        ]);
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('m_level');
-    }
-};
+}
