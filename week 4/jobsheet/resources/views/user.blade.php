@@ -16,13 +16,24 @@
             <th>Username</th>
             <th>Nama</th>
             <th>ID Level Pengguna</th>
+            <th>Aksi</th>
         </tr>
-        <tr>
-            <td>{{ $data ->user_id}}</td>
-            <td>{{ $data->username}}</td>
-            <td>{{ $data->nama }}</td>
-            <td>{{ $data->level_id }}</td>
-        </tr>
+        @foreach ($data as $d)
+            <tr>
+                <td>{{ $d->user_id }}</td>
+                <td>{{ $d->username }}</td>
+                <td>{{ $d->nama }}</td>
+                <td>{{ $d->level_id }}</td>
+                <td>
+                    <a href="/user/ubah/{{$d->user_id}}">Ubah</a>
+                    <form action="/user/hapus/{{$d->user_id}}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
     </table>
 
     {{-- <h1>Data User</h1>
@@ -34,5 +45,4 @@
             <td>{{ $data}}</td>
         </tr> --}}
 </body>
-
 </html>
