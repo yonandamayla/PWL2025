@@ -46,3 +46,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/kategori', [KategoriController::class, 'index']);
+Route::get('/kategori/create', [KategoriController::class, 'create']);
+Route::post('/kategori', [KategoriController::class, 'store']);
