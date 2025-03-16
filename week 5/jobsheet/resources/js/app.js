@@ -1,2 +1,3 @@
 import './bootstrap';
-<script type="text/javascript" src="/js/app.js"></script>
+import "../sass/app.scss";
+import 'laravel-datatables-vite';
