@@ -9,4 +9,8 @@ class WelcomeController extends Controller
             ->with('name', 'Andi')
             ->with('occupation', 'Programmer');
     }
+    public function dashboard()
+{
+    return view('layout.app');
+}
 }

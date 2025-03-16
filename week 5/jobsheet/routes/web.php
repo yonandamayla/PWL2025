@@ -40,6 +40,9 @@ Route::delete('/user/hapus/{id}', [UserController::class, 'hapus']);
 //     return view ('blog.hello', ['name' => 'Andi']);
 // });
 Route::get('/hello', [WelcomeController::class, 'hello']);
-Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/', function () {
+    return view('welcome');
+});
+
