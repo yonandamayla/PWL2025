@@ -286,7 +286,7 @@ return [
     'laravel_css_path' => 'css/app.css',
     'laravel_js_path' => 'js/app.js',
 
-    /*
+/*
     |--------------------------------------------------------------------------
     | Menu Items
     |--------------------------------------------------------------------------
@@ -316,6 +316,16 @@ return [
             'text' => 'search',
         ],
         [
+            'text' => 'Home',
+            'url'  => '/',
+            'icon' => 'fas fa-home',
+        ],
+        [
+            'text' => 'Manage Kategori',
+            'url'  => '/kategori',
+            'icon' => 'fas fa-list',
+        ],
+        [
             'text' => 'blog',
             'url' => 'admin/blog',
             'can' => 'manage-blog',
@@ -342,38 +352,7 @@ return [
             'text' => 'multilevel',
             'icon' => 'fas fa-fw fa-share',
             'submenu' => [
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                    'submenu' => [
-                        [
-                            'text' => 'level_two',
-                            'url' => '#',
-                        ],
-                        [
-                            'text' => 'level_two',
-                            'url' => '#',
-                            'submenu' => [
-                                [
-                                    'text' => 'level_three',
-                                    'url' => '#',
-                                ],
-                                [
-                                    'text' => 'level_three',
-                                    'url' => '#',
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'text' => 'level_one',
-                    'url' => '#',
-                ],
+                // ... existing submenu items ...
             ],
         ],
         ['header' => 'labels'],
@@ -393,6 +372,7 @@ return [
             'url' => '#',
         ],
     ],
+
 
     /*
     |--------------------------------------------------------------------------
