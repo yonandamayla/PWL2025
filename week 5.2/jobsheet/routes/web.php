@@ -44,3 +44,6 @@ Route::group(['prefix' => 'user'], function () {
     Route::put('/{id}', [UserController::class, 'update']); // menyimpan perubahan data user
     Route::delete('/{id}', [UserController::class, 'destroy']); // menghapus data user
 });
+
+Route::get('/level', [LevelController::class, 'index']); // Menampilkan halaman tabel level
+Route::post('/level/list', [LevelController::class, 'list']); // Mengambil data level untuk DataTables
