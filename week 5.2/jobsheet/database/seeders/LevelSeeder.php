@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class LevelSeeder extends Seeder
 {
-    public function run(): void
+    public function run(): void 
     {
         DB::table('m_level')->insert([
             ['level_id' => 1, 'level_kode' => 'ADM', 'level_nama' => 'Administrator'],

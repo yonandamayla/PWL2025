@@ -233,32 +233,27 @@ class UserController extends Controller
 
     public function list(Request $request)
     {
-        // Ambil data user dengan relasi level
-        $users = UserModel::with('level')->select('user_id', 'username', 'nama', 'level_id');
-    
-        // Filter berdasarkan level_id jika ada
-        if ($request->has('level_id') && $request->level_id) {
-            $users->where('level_id', $request->level_id);
+        $levels = LevelModel::query();
+
+        // Filter berdasarkan level_kode jika ada
+        if ($request->has('level_kode') && $request->level_kode) {
+            $levels->where('level_kode', $request->level_kode);
         }
-    
-        // Kembalikan data dalam format DataTables
-        return DataTables::of($users)
-            ->addIndexColumn()
-            ->addColumn('level_nama', function ($user) {
-                // Pastikan relasi level ada sebelum mengakses nama level
-                return $user->level ? $user->level->level_nama : '-';
-            })
-            ->addColumn('aksi', function ($user) {
-                $btn = '<a href="' . url("/user/{$user->user_id}") . '" class="btn btn-info btn-sm">Detail</a> ';
-                $btn .= '<a href="' . url("/user/{$user->user_id}/edit") . '" class="btn btn-warning btn-sm">Edit</a> ';
-                $btn .= '<form class="d-inline-block" method="POST" action="' . url("/user/{$user->user_id}") . '">'
+
+        return DataTables::of($levels)
+            ->addIndexColumn() // Tambahkan nomor urut
+            ->addColumn('aksi', function ($level) {
+                // Tambahkan tombol aksi (Detail, Edit, Hapus)
+                $btn = '<a href="' . url("/level/{$level->level_id}") . '" class="btn btn-info btn-sm">Detail</a> ';
+                $btn .= '<a href="' . url("/level/{$level->level_id}/edit") . '" class="btn btn-warning btn-sm">Edit</a> ';
+                $btn .= '<form class="d-inline-block" method="POST" action="' . url("/level/{$level->level_id}") . '">'
                     . csrf_field()
                     . method_field('DELETE')
                     . '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">Hapus</button>'
                     . '</form>';
                 return $btn;
             })
-            ->rawColumns(['aksi'])
+            ->rawColumns(['aksi']) // Pastikan kolom aksi dirender sebagai HTML
             ->make(true);
     }
 

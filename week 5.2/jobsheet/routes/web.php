@@ -45,5 +45,16 @@ Route::group(['prefix' => 'user'], function () {
     Route::delete('/{id}', [UserController::class, 'destroy']); // menghapus data user
 });
 
-Route::get('/level', [LevelController::class, 'index']); // Menampilkan halaman tabel level
-Route::post('/level/list', [LevelController::class, 'list']); // Mengambil data level untuk DataTables
+Route::group(['prefix' => 'level'], function () {
+    Route::get('/', [LevelController::class, 'index']); // Menampilkan halaman tabel level
+    Route::post('/list', [LevelController::class, 'list']); // Mengambil data level untuk DataTables
+    Route::get('/create', [LevelController::class, 'create']); // Menampilkan form tambah level
+    Route::post('/', [LevelController::class, 'store']); // Menyimpan data level baru
+    Route::get('/{id}', [LevelController::class, 'show']); // Menampilkan detail level
+    Route::get('/{id}/edit', [LevelController::class, 'edit']); // Menampilkan form edit level
+    Route::put('/{id}', [LevelController::class, 'update']); // Menyimpan perubahan level
+    Route::delete('/{id}', [LevelController::class, 'destroy']); // Menghapus level
+});
+
+Route::get('/kategori', [KategoriController::class, 'index']); // Menampilkan halaman tabel kategori
+Route::post('/kategori/list', [KategoriController::class, 'list']); // Mengambil data kategori untuk DataTables
