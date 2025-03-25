@@ -12,7 +12,5 @@ class KategoriModel extends Model
     protected $primaryKey = 'kategori_id'; // Primary key tabel
     public $timestamps = false; // Nonaktifkan timestamps jika tidak digunakan
 
-    protected $fillable = [
-        'kategori_nama' // Kolom yang dapat diisi
-    ];
+    protected $fillable = ['kategori_kode', 'kategori_nama'];
 }

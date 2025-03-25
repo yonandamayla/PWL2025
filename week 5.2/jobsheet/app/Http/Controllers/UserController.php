@@ -230,23 +230,23 @@ class UserController extends Controller
 
         return redirect('/user');
     }
-
     public function list(Request $request)
     {
-        $levels = LevelModel::query();
-
-        // Filter berdasarkan level_kode jika ada
-        if ($request->has('level_kode') && $request->level_kode) {
-            $levels->where('level_kode', $request->level_kode);
-        }
-
-        return DataTables::of($levels)
+        $users = UserModel::join('m_level', 'm_user.level_id', '=', 'm_level.level_id')
+            ->select([
+                'm_user.user_id as id', // ID user
+                'm_user.username', // Username
+                'm_user.nama', // Nama user
+                'm_level.level_nama', // Nama level
+            ]);
+    
+        return DataTables::of($users)
             ->addIndexColumn() // Tambahkan nomor urut
-            ->addColumn('aksi', function ($level) {
+            ->addColumn('aksi', function ($user) {
                 // Tambahkan tombol aksi (Detail, Edit, Hapus)
-                $btn = '<a href="' . url("/level/{$level->level_id}") . '" class="btn btn-info btn-sm">Detail</a> ';
-                $btn .= '<a href="' . url("/level/{$level->level_id}/edit") . '" class="btn btn-warning btn-sm">Edit</a> ';
-                $btn .= '<form class="d-inline-block" method="POST" action="' . url("/level/{$level->level_id}") . '">'
+                $btn = '<a href="' . url("/user/{$user->id}") . '" class="btn btn-info btn-sm">Detail</a> ';
+                $btn .= '<a href="' . url("/user/{$user->id}/edit") . '" class="btn btn-warning btn-sm">Edit</a> ';
+                $btn .= '<form class="d-inline-block" method="POST" action="' . url("/user/{$user->id}") . '">'
                     . csrf_field()
                     . method_field('DELETE')
                     . '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">Hapus</button>'

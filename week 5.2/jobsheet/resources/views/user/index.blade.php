@@ -62,6 +62,7 @@
                     type: "POST",
                     data: function (d) {
                         d.level_id = $('#level_id').val(); // Filter berdasarkan level_id
+                        d._token = "{{ csrf_token() }}"; // Kirim CSRF token
                     }
                 },
                 columns: [
@@ -69,7 +70,7 @@
                     { data: "username", orderable: true, searchable: true },
                     { data: "nama", orderable: true, searchable: true },
                     { data: "level_nama", orderable: false, searchable: false },
-                    { data: "aksi", orderable: false, searchable: false } 
+                    { data: "aksi", orderable: false, searchable: false }
                 ]
             });
 

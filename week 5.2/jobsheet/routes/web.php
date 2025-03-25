@@ -56,5 +56,13 @@ Route::group(['prefix' => 'level'], function () {
     Route::delete('/{id}', [LevelController::class, 'destroy']); // Menghapus level
 });
 
-Route::get('/kategori', [KategoriController::class, 'index']); // Menampilkan halaman tabel kategori
-Route::post('/kategori/list', [KategoriController::class, 'list']); // Mengambil data kategori untuk DataTables
+Route::group(['prefix' => 'kategori'], function () {
+    Route::get('/', [KategoriController::class, 'index']); // Menampilkan halaman tabel kategori
+    Route::post('/list', [KategoriController::class, 'list']); // Mengambil data kategori untuk DataTables
+    Route::get('/create', [KategoriController::class, 'create']); // Menampilkan form tambah kategori
+    Route::post('/', [KategoriController::class, 'store']); // Menyimpan data kategori baru
+    Route::get('/{id}', [KategoriController::class, 'show']); // Menampilkan detail kategori
+    Route::get('/{id}/edit', [KategoriController::class, 'edit']); // Menampilkan form edit kategori
+    Route::put('/{id}', [KategoriController::class, 'update']); // Menyimpan perubahan kategori
+    Route::delete('/{id}', [KategoriController::class, 'destroy']); // Menghapus kategori
+});

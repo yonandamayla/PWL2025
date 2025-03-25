@@ -9,10 +9,35 @@
             </div>
         </div>
         <div class="card-body">
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group row">
+                        <label class="col-1 control-label col-form-label">Filter:</label>
+                        <div class="col-3">
+                            <select class="form-control" id="kategori_nama" name="kategori_nama">
+                                <option value="">- Semua -</option>
+                                @foreach ($kategoris as $kategori)
+                                    <option value="{{ $kategori->kategori_nama }}">{{ $kategori->kategori_nama }}</option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Nama Kategori</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <table class="table table-bordered table-striped table-hover table-sm" id="table_kategori">
                 <thead>
                     <tr>
                         <th>No</th>
+                        <th>Kode Kategori</th>
                         <th>Nama Kategori</th>
                         <th>Aksi</th>
                     </tr>
@@ -23,18 +48,9 @@
 @endsection
 
 @push('css')
-    <!-- Tambahkan CSS DataTables -->
-    <link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
 @endpush
 
 @push('js')
-    <!-- Tambahkan JS DataTables -->
-    <script src="{{ asset('adminlte/plugins/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-    <script src="{{ asset('adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
     <script>
         $(document).ready(function () {
             var tableKategori = $('#table_kategori').DataTable({
@@ -43,15 +59,22 @@
                 ajax: {
                     url: "{{ url('kategori/list') }}",
                     type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}" // Kirim CSRF token
+                    data: function (d) {
+                        d.kategori_nama = $('#kategori_nama').val(); // Filter berdasarkan kategori_nama
+                        d._token = "{{ csrf_token() }}"; // Kirim CSRF token
                     }
                 },
                 columns: [
                     { data: "DT_RowIndex", className: "text-center", orderable: false, searchable: false },
+                    { data: "kategori_kode", orderable: true, searchable: true },
                     { data: "kategori_nama", orderable: true, searchable: true },
                     { data: "aksi", orderable: false, searchable: false }
                 ]
+            });
+
+            // Reload data ketika filter kategori_nama berubah
+            $('#kategori_nama').on('change', function () {
+                tableKategori.ajax.reload();
             });
         });
     </script>
