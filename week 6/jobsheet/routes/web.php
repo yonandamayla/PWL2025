@@ -102,14 +102,23 @@ Route::group(['prefix' => 'barang'], function () {
     Route::delete('/{id}', [BarangController::class, 'destroy']); // Menghapus barang
 });
 
-// Tambahkan route grup untuk supplier
+// Perbaikan route grup untuk supplier - hapus duplikat dan gunakan nama rute yang konsisten
 Route::group(['prefix' => 'supplier'], function () {
     Route::get('/', [SupplierController::class, 'index']); // Menampilkan halaman tabel supplier
     Route::post('/list', [SupplierController::class, 'list']); // Mengambil data supplier untuk DataTables
     Route::get('/create', [SupplierController::class, 'create']); // Menampilkan form tambah supplier
+    Route::get('/create_ajax', [SupplierController::class, 'create_ajax']); // Menampilkan form tambah supplier ajax
+    Route::post('/store_ajax', [SupplierController::class, 'store_ajax']); // Menyimpan data supplier baru ajax
     Route::post('/', [SupplierController::class, 'store']); // Menyimpan data supplier baru
+    // Hapus baris duplikat untuk route /ajax
     Route::get('/{id}', [SupplierController::class, 'show']); // Menampilkan detail supplier
+    Route::get('/{id}/show_ajax', [SupplierController::class, 'show_ajax']); // Menampilkan detail supplier ajax
     Route::get('/{id}/edit', [SupplierController::class, 'edit']); // Menampilkan form edit supplier
+    Route::get('/{id}/edit_ajax', [SupplierController::class, 'edit_ajax']); // Menampilkan form edit supplier ajax
+    Route::put('/{id}/update_ajax', [SupplierController::class, 'update_ajax']); // Menyimpan perubahan supplier ajax
+    Route::get('/{id}/delete_ajax', [SupplierController::class, 'confirm_ajax']); // Menampilkan konfirmasi hapus supplier ajax
+    Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']); // Menghapus supplier ajax
     Route::put('/{id}', [SupplierController::class, 'update']); // Menyimpan perubahan supplier
+    Route::get('/{id}/show_ajax', [SupplierController::class, 'show_ajax']); // Menampilkan detail supplier ajax
     Route::delete('/{id}', [SupplierController::class, 'destroy']); // Menghapus supplier
 });
