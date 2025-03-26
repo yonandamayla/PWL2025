@@ -36,10 +36,13 @@ Route::delete('/user/hapus/{id}', [UserController::class, 'hapus']);
 
 Route::get('/', [WelcomeController::class, 'index']);
 
+// Tambahkan route grup untuk user
 Route::group(['prefix' => 'user'], function () {
     Route::get('/user', [UserController::class, 'index']); // menampilkan halaman awal user
     Route::post('/list', [UserController::class, 'list']); // menampilkan data user dalam bentuk json untuk datatables
     Route::get('/create', [UserController::class, 'create']); // menampilkan halaman form tambah user
+    Route::get('/create_ajax', [UserController::class, 'create_ajax']); // menampilkan halaman form tambah user dengan ajax
+    Route::post('/ajax', [UserController::class, 'store_ajax']); // menyimpan data user baru dengan ajax   
     Route::post('/', [UserController::class, 'store']); // menyimpan data user baru
     Route::get('/{id}', [UserController::class, 'show']); // menampilkan detail user
     Route::get('/{id}/edit', [UserController::class, 'edit']); // menampilkan halaman form edit user
