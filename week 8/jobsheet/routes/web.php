@@ -41,6 +41,8 @@ Route::middleware(['authorize:ADM'])->group(function () {
         Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']); // menghapus data user AJAX
         Route::put('/{id}', [UserController::class, 'update']); // menyimpan perubahan data user
         Route::delete('/{id}', [UserController::class, 'destroy']); // menghapus data user
+        Route::get('/import', [UserController::class, 'import']); // Loads the form
+        Route::post('/import_ajax', [UserController::class, 'import_ajax']); // Handles the upload
     });
 });
 
