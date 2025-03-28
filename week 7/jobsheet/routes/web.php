@@ -15,8 +15,12 @@ Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'postlogin']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Routes for registration
+Route::get('/register', [App\Http\Controllers\RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [App\Http\Controllers\RegisterController::class, 'register']);
+
 // Dashboard yang dapat diakses oleh semua role yang login
-Route::middleware(['auth', 'authorize:ADM,MNG,STF'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/', [WelcomeController::class, 'index'])->name('dashboard');
 });
 
@@ -128,3 +132,5 @@ Route::middleware(['authorize:ADM,MNG'])->group(function () {
         Route::delete('/{id}', [SupplierController::class, 'destroy']); // Menghapus supplier
     });
 });
+
+

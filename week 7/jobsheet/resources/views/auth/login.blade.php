@@ -1,3 +1,4 @@
+<!-- filepath: d:\Apps\laragon\www\PWL2025\week 7\jobsheet\resources\views\auth\login.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -65,6 +66,16 @@
                             <!-- /.col -->
                         </div>
                     </form>
+                    
+                <!-- TAMBAHKAN BAGIAN INI: Link registrasi -->
+                <div class="mt-3 text-center">
+                    <p class="mb-0">
+                        <a href="{{ route('register') }}" class="btn btn-block btn-success">
+                            <i class="fas fa-user-plus mr-2"></i>Register
+                        </a>
+                    </p>
+                </div>
+                <!-- AKHIR DARI BAGIAN TAMBAHAN -->
             </div>
             <!-- /.card-body -->
         </div>
