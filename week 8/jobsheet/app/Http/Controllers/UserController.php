@@ -30,6 +30,7 @@ class UserController extends Controller
 
         return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'level' => $level, 'activeMenu' => $activeMenu]);
     }
+    
 
     public function tambah()
     {
@@ -79,29 +80,29 @@ class UserController extends Controller
     // Ambil data user dalam bentuk json untuk datatables
     public function list(Request $request)
     {
-        $users = UserModel::select('user_id', 'username', 'nama', 'level_id')
-            ->with('level');
+        if ($request->ajax()) {
+            $data = UserModel::select('*');
     
-        // Filter data user berdasarkan level_id
-        if ($request->level_id) {
-            $users->where('level_id', $request->level_id);
+            // Apply level filter if selected
+            if ($request->filled('filter_level')) {
+                $data->where('level_id', $request->filter_level);
+            }
+    
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('aksi', function ($row) {
+                    $btn = '';
+                    // Tambahkan tombol Detail dengan style yang sama
+                    $btn .= '<button onclick="modalAction(\'' . url('/user/' . $row->user_id . '/show_ajax') . '\')" class="btn btn-info btn-sm mr-1">Detail</button> ';
+                    // Edit button with yellow background (warning class)
+                    $btn .= '<button onclick="modalAction(\'' . url('/user/' . $row->user_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm mr-1">Edit</button> ';
+                    // Delete button via modal
+                    $btn .= '<button onclick="modalAction(\'' . url('/user/' . $row->user_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button>';
+                    return $btn;
+                })
+                ->rawColumns(['aksi'])
+                ->make(true);
         }
-    
-        return DataTables::of($users)
-            ->addIndexColumn() // menambahkan kolom index / no urut (default nama kolom: DT_RowIndex)
-            // Tambahkan kolom level_nama dari relasi
-            ->addColumn('level_nama', function ($user) {
-                return $user->level ? $user->level->level_nama : '-';
-            })
-            ->addColumn('aksi', function ($user) { // menambahkan kolom aksi
-                $btn = ''; // Inisialisasi variabel $btn
-                $btn .= '<button onclick="modalAction(\'' . url('/user/' . $user->user_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/user/' . $user->user_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/user/' . $user->user_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button>';
-                return $btn;
-            })
-            ->rawColumns(['aksi']) // memberitahu bahwa kolom aksi adalah html
-            ->make(true);
     }
 
 

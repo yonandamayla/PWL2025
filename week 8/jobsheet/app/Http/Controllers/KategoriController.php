@@ -40,10 +40,15 @@ class KategoriController extends Controller
     {
         $kategoris = KategoriModel::select('kategori_id', 'kategori_kode', 'kategori_nama');
 
+        // Filter berdasarkan kategori_nama jika ada
+        if ($request->has('filter_nama') && $request->filter_nama != '') {
+            $kategoris->where('kategori_nama', $request->filter_nama);
+        }
+
         return DataTables::of($kategoris)
             ->addIndexColumn() // menambahkan kolom index / no urut (default nama kolom: DT_RowIndex)
             ->addColumn('aksi', function ($kategori) { // menambahkan kolom aksi
-                $btn = ''; // Inisialisasi variabel $btn
+                $btn = '';
                 $btn .= '<button onclick="modalAction(\'' . url('/kategori/' . $kategori->kategori_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/kategori/' . $kategori->kategori_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/kategori/' . $kategori->kategori_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button>';

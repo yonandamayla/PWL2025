@@ -8,12 +8,12 @@
             <!-- Button for Importing Users -->
             <button onclick="modalAction('{{ url('/user/import') }}')" class="btn btn-info">Import Pengguna</button>
             <!-- Existing Buttons Adapted for Users -->
-            <a href="{{ url('/user/create') }}" class="btn btn-primary">Tambah Pengguna</a>
+            <a href="{{ url('/user/create') }}" class="btn btn-primary">Tambah Data</a>
             <button onclick="modalAction('{{ url('/user/create_ajax') }}')" class="btn btn-success">Tambah Pengguna (Ajax)</button>
         </div>
     </div>
     <div class="card-body">
-        <!-- Filter Section (Adjusted for Level ID) -->
+        <!-- Filter Section (Dynamic Level Options) -->
         <div id="filter" class="form-horizontal filter-date p-2 border-bottom mb-2">
             <div class="row">
                 <div class="col-md-12">
@@ -22,10 +22,9 @@
                         <div class="col-md-3">
                             <select name="filter_level" class="form-control form-control-sm filter_level">
                                 <option value="">- Semua -</option>
-                                <option value="1">Admin</option>
-                                <option value="2">Manager</option> <!-- Added for level_id 2 -->
-                                <option value="3">Staff</option>   <!-- Added for level_id 3 -->
-                                <option value="4">Customer</option>
+                                @foreach($level as $l)
+                                    <option value="{{ $l->level_id }}">{{ $l->level_nama }}</option>
+                                @endforeach
                             </select>
                             <small class="form-text text-muted">Level Pengguna</small>
                         </div>

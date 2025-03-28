@@ -24,9 +24,13 @@ class LevelController extends Controller
 
         $activeMenu = 'level'; // Set menu yang sedang aktif
 
+        // Ambil data level untuk dropdown filter
+        $levels = LevelModel::select('level_id', 'level_kode', 'level_nama')->get();
+
         return view('level.index', [
             'breadcrumb' => $breadcrumb,
             'page' => $page,
+            'levels' => $levels,
             'activeMenu' => $activeMenu
         ]);
     }
@@ -36,10 +40,15 @@ class LevelController extends Controller
     {
         $levels = LevelModel::select('level_id', 'level_nama', 'level_kode');
 
+        // Filter berdasarkan level_kode jika ada
+        if ($request->has('filter_kode') && $request->filter_kode != '') {
+            $levels->where('level_kode', $request->filter_kode);
+        }
+
         return DataTables::of($levels)
             ->addIndexColumn() // menambahkan kolom index / no urut (default nama kolom: DT_RowIndex)
             ->addColumn('aksi', function ($level) { // menambahkan kolom aksi
-                $btn = ''; // Inisialisasi variabel $btn
+                $btn = '';
                 $btn .= '<button onclick="modalAction(\'' . url('/level/' . $level->level_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/level/' . $level->level_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
                 $btn .= '<button onclick="modalAction(\'' . url('/level/' . $level->level_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button>';

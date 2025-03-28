@@ -134,7 +134,7 @@ Route::middleware(['authorize:ADM,MNG'])->group(function () {
         Route::put('/{id}', [SupplierController::class, 'update']); // Menyimpan perubahan supplier
         Route::get('/{id}/show_ajax', [SupplierController::class, 'show_ajax']); // Menampilkan detail supplier ajax
         Route::delete('/{id}', [SupplierController::class, 'destroy']); // Menghapus supplier
+        Route::get('/import', [SupplierController::class, 'import']); // Loads the import form
+        Route::post('/import_ajax', [SupplierController::class, 'import_ajax']); // Handles the file upload
     });
 });
-
-

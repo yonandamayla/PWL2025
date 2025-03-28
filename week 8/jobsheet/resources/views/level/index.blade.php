@@ -10,6 +10,26 @@
             </div>
         </div>
         <div class="card-body">
+            <!-- Filter Section (Dynamic Level Kode) -->
+            <div id="filter" class="form-horizontal filter-date p-2 border-bottom mb-2">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group form-group-sm row text-sm mb-0">
+                            <label for="filter_kode" class="col-md-1 col-form-label">Filter</label>
+                            <div class="col-md-3">
+                                <select name="filter_kode" class="form-control form-control-sm filter_kode">
+                                    <option value="">- Semua -</option>
+                                    @foreach($levels as $l)
+                                        <option value="{{ $l->level_kode }}">{{ $l->level_kode }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Kode Level</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             @if (session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
@@ -57,6 +77,7 @@
                     type: "POST",
                     data: function (d) {
                         d._token = "{{ csrf_token() }}";
+                        d.filter_kode = $('.filter_kode').val();
                     }
                 },
                 columns: [
@@ -65,6 +86,18 @@
                     { data: "level_nama", orderable: true, searchable: true },
                     { data: "aksi", orderable: false, searchable: false }
                 ]
+            });
+
+            // Event listener untuk filter
+            $('.filter_kode').change(function() {
+                window.dataLevel.draw();
+            });
+
+            // Event listener untuk pencarian dengan tombol Enter
+            $('#table_level_filter input').unbind().bind('keyup', function(e) {
+                if (e.keyCode == 13) { // Enter key
+                    window.dataLevel.search(this.value).draw();
+                }
             });
         });
     </script>
