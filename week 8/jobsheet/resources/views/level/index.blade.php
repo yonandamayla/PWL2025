@@ -5,8 +5,12 @@
         <div class="card-header">
             <h3 class="card-title">{{ $page->title }}</h3>
             <div class="card-tools">
+                <!-- Add this new button for importing levels -->
+                <button onclick="modalAction('{{ url('/level/import') }}')" class="btn btn-info btn-sm mt-1">Import
+                    Level</button>
                 <a class="btn btn-sm btn-primary mt-1" href="{{ url('level/create') }}">Tambah</a>
-                <button onclick="modalAction('{{url('level/create_ajax')}}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
+                <button onclick="modalAction('{{url('level/create_ajax')}}')" class="btn btn-sm btn-success mt-1">Tambah
+                    Ajax</button>
             </div>
         </div>
         <div class="card-body">
@@ -89,12 +93,12 @@
             });
 
             // Event listener untuk filter
-            $('.filter_kode').change(function() {
+            $('.filter_kode').change(function () {
                 window.dataLevel.draw();
             });
 
             // Event listener untuk pencarian dengan tombol Enter
-            $('#table_level_filter input').unbind().bind('keyup', function(e) {
+            $('#table_level_filter input').unbind().bind('keyup', function (e) {
                 if (e.keyCode == 13) { // Enter key
                     window.dataLevel.search(this.value).draw();
                 }
