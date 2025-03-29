@@ -83,6 +83,8 @@ Route::middleware(['authorize:ADM,MNG'])->group(function () {
         Route::put('/{id}/update_ajax', [KategoriController::class, 'update_ajax']); // Menyimpan perubahan kategori ajax
         Route::get('/{id}/delete_ajax', [KategoriController::class, 'confirm_ajax']); // Menampilkan konfirmasi hapus kategori ajax
         Route::delete('/{id}/delete_ajax', [KategoriController::class, 'delete_ajax']); // Menghapus kategori ajax
+        Route::get('/import', [KategoriController::class, 'import']); // Show import form
+        Route::post('/import_ajax', [KategoriController::class, 'import_ajax']); // Handle file upload
         Route::put('/{id}', [KategoriController::class, 'update']); // Menyimpan perubahan kategori
         Route::delete('/{id}', [KategoriController::class, 'destroy']); // Menghapus kategori
     });
