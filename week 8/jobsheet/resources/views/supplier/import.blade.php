@@ -50,7 +50,7 @@ $(document).ready(function() {
                 contentType: false,
                 success: function(response) {
                     if (response.status) {
-                        $('#myModal').modal('hide');
+                        $('#modal-master').modal('hide');
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',

@@ -129,8 +129,8 @@ Route::middleware(['authorize:ADM,MNG'])->group(function () {
         Route::get('/{id}/edit', [SupplierController::class, 'edit']); // Menampilkan form edit supplier
         Route::get('/{id}/edit_ajax', [SupplierController::class, 'edit_ajax']); // Menampilkan form edit supplier ajax
         Route::put('/{id}/update_ajax', [SupplierController::class, 'update_ajax']); // Menyimpan perubahan supplier ajax
-        Route::get('/{id}/delete_ajax', [SupplierController::class, 'confirm_ajax']); // Menampilkan konfirmasi hapus supplier ajax
-        Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']); // Menghapus supplier ajax
+        Route::get('/{id}/delete_ajax', [SupplierController::class, 'confirm_ajax']);
+        Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']);
         Route::put('/{id}', [SupplierController::class, 'update']); // Menyimpan perubahan supplier
         Route::get('/{id}/show_ajax', [SupplierController::class, 'show_ajax']); // Menampilkan detail supplier ajax
         Route::delete('/{id}', [SupplierController::class, 'destroy']); // Menghapus supplier

@@ -1,153 +1,130 @@
 @extends('layouts.template')
 
 @section('content')
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Daftar Pengguna</h3>
-        <div class="card-tools">
-            <!-- Button for Importing Users -->
-            <button onclick="modalAction('{{ url('/user/import') }}')" class="btn btn-info">Import Supplier</button>
-            <!-- Existing Buttons Adapted for Users -->
-            <a href="{{ url('/user/create') }}" class="btn btn-primary">Tambah Data</a>
-            <button onclick="modalAction('{{ url('/user/create_ajax') }}')" class="btn btn-success">Tambah Pengguna (Ajax)</button>
+    <div class="card card-outline card-primary">
+        <div class="card-header">
+            <h3 class="card-title">Daftar Supplier</h3>
+            <div class="card-tools">
+                <button onclick="modalAction('{{ url('/supplier/import') }}')" class="btn btn-info">Import Supplier</button>
+                <a href="{{ url('/supplier/create') }}" class="btn btn-primary">Tambah Data</a>
+                <button onclick="modalAction('{{ url('/supplier/create_ajax') }}')" class="btn btn-success">Tambah Data (Ajax)</button>
+            </div>
         </div>
-    </div>
-    <div class="card-body">
-        <!-- Filter Section (Adjusted for Level ID) -->
-        <div id="filter" class="form-horizontal filter-date p-2 border-bottom mb-2">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group form-group-sm row text-sm mb-0">
-                        <label for="filter_level" class="col-md-1 col-form-label">Filter</label>
-                        <div class="col-md-3">
-                            <select name="filter_level" class="form-control form-control-sm filter_level">
-                                <option value="">- Semua -</option>
-                                @foreach($levels as $level)
-                                    <option value="{{ $level->level_id }}">{{ $level->level_nama }}</option>
-                                @endforeach
-                            </select>
-                            <small class="form-text text-muted">Level Pengguna</small>
+
+        <div class="card-body">
+            <!-- Filter Section -->
+            <div id="filter" class="form-horizontal filter-date p-2 border-bottom mb-2">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group form-group-sm row text-sm mb-0">
+                            <label for="filter_name" class="col-md-1 col-form-label">Filter</label>
+                            <div class="col-md-3">
+                                <select name="filter_name" class="form-control form-control-sm filter_name">
+                                    <option value="">- Semua -</option>
+                                    @foreach($suppliers as $supplier)
+                                        <option value="{{ $supplier->supplier_nama }}">{{ $supplier->supplier_nama }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Nama Supplier</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Success/Error Messages -->
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        
-        @if(session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
-        
-        <!-- Users Table -->
-        <table class="table table-bordered table-sm table-striped table-hover" id="table-user">
-            <thead>
+
+            <!-- Success/Error Messages -->
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
+            <!-- Suppliers Table -->
+            <table class="table table-bordered table-striped table-hover table-sm" id="table_supplier">
+                <thead>
                 <tr>
                     <th>No</th>
-                    <th>ID Pengguna</th>
-                    <th>Username</th>
-                    <th>Nama</th>
-                    <th>Level</th>
+                    <th>Kode Supplier</th>
+                    <th>Nama Supplier</th>
+                    <th>Alamat Supplier</th>
                     <th>Aksi</th>
                 </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-<!-- Modal for Import Form -->
-<div id="myModal" class="modal fade animate shake" tabindex="-1" data-backdrop="static" data-keyboard="false" data-width="75%"></div>
-@endsection 
+    <!-- Modal for Import Form -->
+    <div id="modal-supplier" class="modal fade animate shake" tabindex="-1" data-backdrop="static" data-keyboard="false" data-width="75%"></div>
+@endsection
 
 @push('js')
 <script>
     function modalAction(url = '') {
-        $('#myModal').load(url, function() {
-            $('#myModal').modal('show');
+        $('#modal-supplier').load(url, function() {
+            $('#modal-supplier').modal('show');
         });
     }
 
-    var tableUser;
+    var tableSupplier;
     $(document).ready(function() {
-        tableUser = $('#table-user').DataTable({
+        tableSupplier = $('#table_supplier').DataTable({
             processing: true,
-            serverSide: true, 
+            serverSide: true,
             ajax: {
-                "url": "{{ url('user/list') }}",
+                "url": "{{ url('supplier/list') }}",
                 "dataType": "json",
                 "type": "POST",
                 "data": function (d) {
-                    d._token = "{{ csrf_token() }}"; // Tambahkan CSRF token
-                    d.filter_level = $('.filter_level').val();
+                    d.filter_name = $('.filter_name').val();
                 }
             },
             columns: [
                 {
                     data: "DT_RowIndex",
                     className: "text-center",
-                    width: "5%",
                     orderable: false,
                     searchable: false
                 },
                 {
-                    data: "user_id",
+                    data: "supplier_kode",
                     className: "",
-                    width: "15%",
                     orderable: true,
                     searchable: true
                 },
                 {
-                    data: "username",
+                    data: "supplier_nama",
                     className: "",
-                    width: "25%",
                     orderable: true,
                     searchable: true
                 },
                 {
-                    data: "nama",
+                    data: "supplier_alamat",
                     className: "",
-                    width: "25%",
                     orderable: true,
                     searchable: true
-                },
-                {
-                    data: "level_id",
-                    className: "",
-                    width: "15%",
-                    orderable: true,
-                    searchable: false,
-                    render: function(data) {
-                        const levels = {
-                            1: 'Admin',
-                            2: 'Manager',  
-                            3: 'Staff',   
-                            4: 'Customer'
-                        };
-                        return levels[data] || 'Unknown';
-                    }
                 },
                 {
                     data: "aksi",
                     className: "text-center",
-                    width: "15%",
                     orderable: false,
                     searchable: false
                 }
             ]
         });
 
-        $('#table-user_filter input').unbind().bind().on('keyup', function(e) {
-            if (e.keyCode == 13) { // Enter key
-                tableUser.search(this.value).draw();
-            }
+        // Add change event listener for filter
+        $('.filter_name').change(function() {
+            tableSupplier.draw(); // Redraw table with new filter value
         });
 
-        $('.filter_level').change(function() {
-            tableUser.draw();
+        $('#table_supplier_filter input').unbind().bind().on('keyup', function(e) {
+            if (e.keyCode == 13) {
+                tableSupplier.search(this.value).draw();
+            }
         });
     });
 </script>
