@@ -17,24 +17,24 @@ class SupplierController extends Controller
             'title' => 'Daftar Supplier',
             'list' => ['Home', 'Supplier'],
         ];
-    
+
         $page = (object) [
             'title' => 'Daftar supplier yang terdaftar dalam sistem',
         ];
-    
+
         $activeMenu = 'supplier';
-    
+
         // Change from $supplier to $suppliers (plural)
         // Also, get only distinct supplier names for the filter dropdown
         $suppliers = SupplierModel::select('supplier_nama')
             ->distinct()
             ->orderBy('supplier_nama')
             ->get();
-    
+
         return view('supplier.index', [
-            'breadcrumb' => $breadcrumb, 
-            'activeMenu' => $activeMenu, 
-            'page' => $page, 
+            'breadcrumb' => $breadcrumb,
+            'activeMenu' => $activeMenu,
+            'page' => $page,
             'suppliers' => $suppliers // Changed from 'supplier' to 'suppliers'
         ]);
     }
@@ -42,12 +42,12 @@ class SupplierController extends Controller
     public function list(Request $request)
     {
         $suppliers = SupplierModel::select('supplier_id', 'supplier_kode', 'supplier_nama', 'supplier_alamat', 'supplier_telp');
-    
+
         // Apply filter by supplier name if selected
         if ($request->filled('filter_name')) {
             $suppliers->where('supplier_nama', $request->filter_name);
         }
-    
+
         return DataTables::of($suppliers)
             ->addIndexColumn()
             ->addColumn('aksi', function ($supplier) {
@@ -333,4 +333,64 @@ class SupplierController extends Controller
         return redirect('/');
     }
 
+    public function export_excel()
+    {
+        // Get supplier data to export
+        $suppliers = SupplierModel::select('supplier_id', 'supplier_kode', 'supplier_nama', 'supplier_alamat', 'supplier_telp')
+            ->orderBy('supplier_id')
+            ->get();
+
+        // Create new spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set column headers
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'ID Supplier');
+        $sheet->setCellValue('C1', 'Kode Supplier');
+        $sheet->setCellValue('D1', 'Nama Supplier');
+        $sheet->setCellValue('E1', 'Alamat');
+        $sheet->setCellValue('F1', 'Telepon');
+
+        // Make headers bold
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+
+        // Populate data
+        $no = 1;
+        $baris = 2;
+        foreach ($suppliers as $supplier) {
+            $sheet->setCellValue('A' . $baris, $no);
+            $sheet->setCellValue('B' . $baris, $supplier->supplier_id);
+            $sheet->setCellValue('C' . $baris, $supplier->supplier_kode);
+            $sheet->setCellValue('D' . $baris, $supplier->supplier_nama);
+            $sheet->setCellValue('E' . $baris, $supplier->supplier_alamat);
+            $sheet->setCellValue('F' . $baris, $supplier->supplier_telp);
+            $baris++;
+            $no++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'F') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        // Set sheet title
+        $sheet->setTitle('Data Supplier');
+
+        // Create writer and set filename
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $fileName = 'Data_Supplier_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        // Set headers for file download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('Pragma: public');
+
+        $writer->save('php://output');
+        exit;
+    }
 }

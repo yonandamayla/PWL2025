@@ -144,5 +144,6 @@ Route::middleware(['authorize:ADM,MNG'])->group(function () {
         Route::delete('/{id}', [SupplierController::class, 'destroy']); // Menghapus supplier
         Route::get('/import', [SupplierController::class, 'import']); // Loads the import form
         Route::post('/import_ajax', [SupplierController::class, 'import_ajax']); // Handles the file upload
+        Route::get('/export_excel', [SupplierController::class, 'export_excel']); // ajax form download excel
     });
 });
