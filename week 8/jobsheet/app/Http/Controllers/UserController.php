@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -477,5 +478,23 @@ class UserController extends Controller
 
         $writer->save('php://output');
         exit;
+    }
+
+    public function export_pdf() 
+    {
+        // Get user data to export with level relationship
+        $users = UserModel::with('level')
+            ->select('user_id', 'username', 'nama', 'level_id')
+            ->orderBy('user_id')
+            ->orderBy('level_id')
+            ->get();
+    
+        // use Barryvdh\DomPDF\Facade\PDF
+        $pdf = Pdf::loadView('user.export_pdf', ['users' => $users]);
+        $pdf->setPaper('a4', 'portrait'); // Set paper size and orientation
+        $pdf->setOption("isRemoteEnabled", true); // Enable remote images
+        $pdf->render();
+    
+        return $pdf->stream('Data User'.date('Y-m-d_H-i-s').'.pdf');
     }
 }
