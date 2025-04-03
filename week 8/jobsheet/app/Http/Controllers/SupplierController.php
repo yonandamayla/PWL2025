@@ -8,6 +8,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SupplierController extends Controller
 {
@@ -392,5 +393,22 @@ class SupplierController extends Controller
 
         $writer->save('php://output');
         exit;
+    }
+
+    public function export_pdf()
+    {
+        // Get supplier data to export
+        $suppliers = SupplierModel::select('supplier_id', 'supplier_kode', 'supplier_nama', 'supplier_alamat', 'supplier_telp')
+            ->orderBy('supplier_id')
+            ->orderBy('supplier_kode')
+            ->get();
+
+        // use Barryvdh\DomPDF\Facade\PDF
+        $pdf = Pdf::loadView('supplier.export_pdf', ['suppliers' => $suppliers]);
+        $pdf->setPaper('a4', 'portrait'); // Set paper size and orientation
+        $pdf->setOption("isRemoteEnabled", true); // Enable remote images
+        $pdf->render();
+
+        return $pdf->stream('Data_Supplier_' . date('Y-m-d_H-i-s') . '.pdf');
     }
 }
