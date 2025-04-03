@@ -9,6 +9,7 @@ use App\Models\LevelModel; // Import the LevelModel class
 use Illuminate\Support\Facades\Validator; // Import the Validator class
 use Illuminate\Support\Facades\Log; // Import the Log facade
 use PhpOffice\PhpSpreadsheet\IOFactory; // Import the IOFactory class
+use Barryvdh\DomPDF\Facade\Pdf; // Import the Pdf facade
 
 class LevelController extends Controller
 {
@@ -413,5 +414,22 @@ class LevelController extends Controller
 
         $writer->save('php://output');
         exit;
+    }
+
+    public function export_pdf()
+    {
+        // Get level data to export
+        $levels = LevelModel::select('level_id', 'level_kode', 'level_nama')
+            ->orderBy('level_id')
+            ->orderBy('level_kode')
+            ->get();
+
+        // use Barryvdh\DomPDF\Facade\PDF
+        $pdf = Pdf::loadView('level.export_pdf', ['levels' => $levels]);
+        $pdf->setPaper('a4', 'portrait'); // Set paper size and orientation
+        $pdf->setOption("isRemoteEnabled", true); // Enable remote images 
+        $pdf->render();
+
+        return $pdf->stream('Data Level' . date('Y-m-d_H-i-s') . '.pdf');
     }
 }
