@@ -19,19 +19,19 @@ class KategoriController extends Controller
             'title' => 'Daftar Kategori',
             'list' => ['Home', 'Kategori']
         ];
-    
+
         $page = (object) [
             'title' => 'Daftar kategori barang'
         ];
-    
+
         $activeMenu = 'kategori';
-    
+
         // Get distinct category names for filter dropdown
         $kategoris = KategoriModel::select('kategori_nama')
             ->distinct()
             ->orderBy('kategori_nama')
             ->get();
-    
+
         return view('kategori.index', [
             'breadcrumb' => $breadcrumb,
             'page' => $page,
@@ -44,12 +44,12 @@ class KategoriController extends Controller
     public function list(Request $request)
     {
         $kategori = KategoriModel::select('kategori_id', 'kategori_kode', 'kategori_nama');
-        
+
         // Apply filter if specified
         if ($request->filled('filter_kategori')) {
             $kategori->where('kategori_nama', $request->filter_kategori);
         }
-        
+
         return DataTables::of($kategori)
             ->addIndexColumn()
             ->addColumn('aksi', function ($kategori) {
@@ -377,5 +377,62 @@ class KategoriController extends Controller
         }
 
         return redirect('/kategori');
+    }
+
+    public function export_excel()
+    {
+        // Get kategori data to export
+        $kategoris = KategoriModel::select('kategori_id', 'kategori_kode', 'kategori_nama')
+            ->orderBy('kategori_id')
+            ->get();
+
+        // Create new spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set column headers
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'ID Kategori');
+        $sheet->setCellValue('C1', 'Kode Kategori');
+        $sheet->setCellValue('D1', 'Nama Kategori');
+
+        // Make headers bold
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+
+        // Populate data
+        $no = 1;
+        $baris = 2;
+        foreach ($kategoris as $kategori) {
+            $sheet->setCellValue('A' . $baris, $no);
+            $sheet->setCellValue('B' . $baris, $kategori->kategori_id);
+            $sheet->setCellValue('C' . $baris, $kategori->kategori_kode);
+            $sheet->setCellValue('D' . $baris, $kategori->kategori_nama);
+            $baris++;
+            $no++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'D') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        // Set sheet title
+        $sheet->setTitle('Data Kategori');
+
+        // Create writer and set filename
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $fileName = 'Data_Kategori_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        // Set headers for file download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('Pragma: public');
+
+        $writer->save('php://output');
+        exit;
     }
 }
