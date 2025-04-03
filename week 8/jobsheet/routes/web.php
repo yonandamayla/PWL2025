@@ -120,6 +120,7 @@ Route::middleware(['authorize:ADM,MNG'])->group(function () {
         Route::get('/import', [BarangController::class, 'import']); // ajax form upload excel
         Route::post('/import_ajax', [BarangController::class, 'import_ajax']); // AJAX import excel
         Route::get('/export_excel', [BarangController::class, 'export_excel']); // ajax form download excel
+        Route::get('/export_pdf', [BarangController::class, 'export_pdf']); // ajax form download pdf
     });
 });
 
