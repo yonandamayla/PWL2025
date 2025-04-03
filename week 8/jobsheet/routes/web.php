@@ -63,6 +63,7 @@ Route::middleware(['authorize:ADM,MNG'])->group(function () {
         Route::delete('/{id}/delete_ajax', [LevelController::class, 'delete_ajax']); // Menghapus level ajax
         Route::get('/import', [LevelController::class, 'import']); // Show import form
         Route::post('/import_ajax', [LevelController::class, 'import_ajax']); // Handle file upload
+        Route::get('/export_excel', [LevelController::class, 'export_excel']); // ajax form download excel
         Route::put('/{id}', [LevelController::class, 'update']); // Menyimpan perubahan level
         Route::delete('/{id}', [LevelController::class, 'destroy']); // Menghapus level
     });
