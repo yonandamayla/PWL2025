@@ -5,10 +5,8 @@
     <div class="card-header">
         <h3 class="card-title">Daftar Pengguna</h3>
         <div class="card-tools">
-            <!-- Button for Importing Users -->
             <button onclick="modalAction('{{ url('/user/import') }}')" class="btn btn-info">Import Pengguna</button>
-            <!-- Existing Buttons Adapted for Users -->
-            <a href="{{ url('/user/create') }}" class="btn btn-primary">Tambah Data</a>
+            <a href="{{ url('/user/export_excel') }}" class="btn btn-primary">Export User</a>
             <button onclick="modalAction('{{ url('/user/create_ajax') }}')" class="btn btn-success">Tambah Pengguna (Ajax)</button>
         </div>
     </div>

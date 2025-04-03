@@ -30,7 +30,7 @@ class UserController extends Controller
 
         return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'level' => $level, 'activeMenu' => $activeMenu]);
     }
-    
+
 
     public function tambah()
     {
@@ -82,12 +82,12 @@ class UserController extends Controller
     {
         if ($request->ajax()) {
             $data = UserModel::select('*');
-    
+
             // Apply level filter if selected
             if ($request->filled('filter_level')) {
                 $data->where('level_id', $request->filter_level);
             }
-    
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('aksi', function ($row) {
@@ -381,14 +381,14 @@ class UserController extends Controller
                     'msgField' => $validator->errors()
                 ]);
             }
-    
+
             $file = $request->file('file_user');
             $reader = IOFactory::createReader('Xlsx');
             $reader->setReadDataOnly(true);
             $spreadsheet = $reader->load($file->getRealPath());
             $sheet = $spreadsheet->getActiveSheet();
             $data = $sheet->toArray(null, false, true, true);
-    
+
             $insert = [];
             if (count($data) > 1) {
                 foreach ($data as $row => $value) {
@@ -417,5 +417,65 @@ class UserController extends Controller
             ]);
         }
         return redirect('/');
+    }
+
+    public function export_excel()
+    {
+        // Get user data to export with level relationship
+        $users = UserModel::with('level')
+            ->select('user_id', 'username', 'nama', 'level_id')
+            ->orderBy('user_id')
+            ->get();
+
+        // Create new spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set column headers
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'ID User');
+        $sheet->setCellValue('C1', 'Username');
+        $sheet->setCellValue('D1', 'Nama Lengkap');
+        $sheet->setCellValue('E1', 'Level');
+
+        // Make headers bold
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+
+        // Populate data
+        $no = 1;
+        $baris = 2;
+        foreach ($users as $user) {
+            $sheet->setCellValue('A' . $baris, $no);
+            $sheet->setCellValue('B' . $baris, $user->user_id);
+            $sheet->setCellValue('C' . $baris, $user->username);
+            $sheet->setCellValue('D' . $baris, $user->nama);
+            $sheet->setCellValue('E' . $baris, $user->level->level_nama ?? ''); // Use level relationship
+            $baris++;
+            $no++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'E') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        // Set sheet title
+        $sheet->setTitle('Data User');
+
+        // Create writer and set filename
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $fileName = 'Data_User_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        // Set headers for file download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('Pragma: public');
+
+        $writer->save('php://output');
+        exit;
     }
 }
