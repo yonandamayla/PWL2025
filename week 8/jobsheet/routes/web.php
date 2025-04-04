@@ -22,9 +22,12 @@ Route::post('/register', [App\Http\Controllers\RegisterController::class, 'regis
 // Dashboard yang dapat diakses oleh semua role yang login
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [WelcomeController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [UserController::class, 'profile']);
+    Route::post('/user/update-photo', [UserController::class, 'updatePhoto']);
 });
 
 Route::middleware(['authorize:ADM'])->group(function () {
+
     // Tambahkan route grup untuk user yg memerlukan autentikasi disini
     Route::group(['prefix' => 'user'], function () {
         Route::get('/', [UserController::class, 'index']); // menampilkan halaman awal user
@@ -47,6 +50,7 @@ Route::middleware(['authorize:ADM'])->group(function () {
         Route::get('/export_pdf', [UserController::class, 'export_pdf']); // ajax form download pdf
     });
 });
+
 
 Route::middleware(['authorize:ADM,MNG'])->group(function () {
     // Tambahkan route grup untuk level
