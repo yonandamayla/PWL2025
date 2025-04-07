@@ -1,4 +1,3 @@
-_users_table.php
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -9,20 +8,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('role_id'); 
+            $table->unsignedBigInteger('item_type_id');
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->string('profile_picture')->nullable();
-            $table->rememberToken();
+            $table->decimal('price', 10, 2);
+            $table->integer('stock');
             $table->timestamps();
+            
+            $table->foreign('item_type_id')->references('id')->on('item_types')->onDelete('cascade');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('items');
     }
 };
