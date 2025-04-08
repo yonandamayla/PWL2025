@@ -4,35 +4,42 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\OrderModel;
-use Carbon\Carbon;
 
 class OrderSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        // Create sample orders
         OrderModel::create([
-            'user_id' => 3, // Cashier
-            'total_price' => 1200000.00,
-            'discount' => 50000.00,
+            'id' => 1,
+            'user_id' => 1, // Admin User
+            'total_price' => 25000,
+            'discount' => 10, // 10% diskon
             'status' => 'completed',
-            'order_date' => Carbon::now()->subDays(5),
+            'order_date' => now()->subDays(2),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        
+
         OrderModel::create([
-            'user_id' => 3, // Cashier
-            'total_price' => 545000.00,
+            'id' => 2,
+            'user_id' => 2, // Kasir User
+            'total_price' => 15000,
             'discount' => 0,
-            'status' => 'completed',
-            'order_date' => Carbon::now()->subDays(3),
+            'status' => 'pending',
+            'order_date' => now()->subDay(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        
+
         OrderModel::create([
-            'user_id' => 3, // Cashier
-            'total_price' => 9845000.00,
-            'discount' => 200000.00,
-            'status' => 'processing',
-            'order_date' => Carbon::now()->subDay(),
+            'id' => 3,
+            'user_id' => 3, // Kasir Dua
+            'total_price' => 50000,
+            'discount' => 5, // 5% diskon
+            'status' => 'completed',
+            'order_date' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }

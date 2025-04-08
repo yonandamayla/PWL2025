@@ -7,51 +7,46 @@ use App\Models\OrderItemModel;
 
 class OrderItemSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        // Order 1 items
         OrderItemModel::create([
+            'id' => 1,
             'order_id' => 1,
-            'item_id' => 1, // Smartphone X
-            'quantity' => 1,
-            'subtotal' => 1200000.00,
+            'item_id' => 1, // Kopi Sachet
+            'quantity' => 5,
+            'subtotal' => 12500, // 5 x 2500
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        
-        // Order 2 items
+
         OrderItemModel::create([
-            'order_id' => 2,
-            'item_id' => 3, // T-shirt Regular Fit
-            'quantity' => 2,
-            'subtotal' => 300000.00,
+            'id' => 2,
+            'order_id' => 1,
+            'item_id' => 2, // Teh Celup
+            'quantity' => 5,
+            'subtotal' => 15000, // 5 x 3000
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        
+
         OrderItemModel::create([
+            'id' => 3,
             'order_id' => 2,
-            'item_id' => 5, // Premium Coffee Beans 500g
-            'quantity' => 1,
-            'subtotal' => 95000.00,
-        ]);
-        
-        OrderItemModel::create([
-            'order_id' => 2,
-            'item_id' => 6, // Notebook Set
+            'item_id' => 3, // Sabun Colek
             'quantity' => 3,
-            'subtotal' => 135000.00,
+            'subtotal' => 15000, // 3 x 5000
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        
-        // Order 3 items
+
         OrderItemModel::create([
+            'id' => 4,
             'order_id' => 3,
-            'item_id' => 2, // Laptop Pro
+            'item_id' => 5, // Popok Bayi
             'quantity' => 1,
-            'subtotal' => 9500000.00,
-        ]);
-        
-        OrderItemModel::create([
-            'order_id' => 3,
-            'item_id' => 4, // Denim Jeans
-            'quantity' => 1,
-            'subtotal' => 350000.00,
+            'subtotal' => 50000, // 1 x 50000
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }
