@@ -13,14 +13,12 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
 Route::prefix('/category')->group(function () {
     Route::get('/food-beverage', [ProductController::class, 'foodBeverage']);
     Route::get('/beauty-health', [ProductController::class, 'beautyHealth']);
     Route::get('/home-care', [ProductController::class, 'homeCare']);
     Route::get('/baby-kid', [ProductController::class, 'babyKid']);
 });
-
 Route::get('/user/{id}/name/{name}', [ProfileController::class, 'index']);
 Route::get('/transaction', [TransactionController::class, 'index']);
 
