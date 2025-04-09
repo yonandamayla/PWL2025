@@ -20,7 +20,8 @@ Route::prefix('/category')->group(function () {
     Route::get('/baby-kid', [ProductController::class, 'babyKid']);
 });
 Route::get('/user/{id}/name/{name}', [ProfileController::class, 'index']);
-Route::get('/transaction', [TransactionController::class, 'index']);
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/transaction/create', [TransactionController::class, 'create'])->name('transactions.create');
 
 Route::get('/role', [RoleController::class, 'index']);
 Route::get('/user', [UserController::class, 'index']);
