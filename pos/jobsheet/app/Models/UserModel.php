@@ -9,12 +9,9 @@ use Illuminate\Notifications\Notifiable;
 class UserModel extends Authenticatable
 {
     use HasFactory, Notifiable;
-    
-    protected $table = 'users'; // Explicitly set the table name
-    
-    /**
-     * The attributes that are mass assignable.
-     */
+
+    protected $table = 'users';
+
     protected $fillable = [
         'role_id',
         'name',
@@ -22,28 +19,31 @@ class UserModel extends Authenticatable
         'password',
         'profile_picture',
     ];
-    
-    /**
-     * The attributes that should be hidden for serialization.
-     */
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
-    
-    /**
-     * Get the role that owns the user.
-     */
+
     public function role()
     {
         return $this->belongsTo(RoleModel::class, 'role_id');
     }
-    
-    /**
-     * Get the orders for the user.
-     */
+
     public function orders()
     {
         return $this->hasMany(OrderModel::class, 'user_id');
+    }
+
+    // Add this method to UserModel.php
+    public function findForLogin($username)
+    {
+        // If the username contains @, treat it as a full email
+        if (strpos($username, '@') !== false) {
+            return $this->where('email', $username)->first();
+        }
+
+        // Otherwise, append your domain
+        return $this->where('email', $username . '@example.com')->first();
     }
 }

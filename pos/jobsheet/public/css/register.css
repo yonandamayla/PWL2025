@@ -1,0 +1,58 @@
+/* Additional styles for register page */
+.register-box {
+    width: 500px;
+    max-width: 95%;
+}
+
+/* Custom outline button for login link */
+.btn-outline-primary {
+    background-color: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: rgba(67, 97, 238, 0.1);
+    color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.2);
+}
+
+/* Terms and conditions checkbox */
+.form-check-label a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.form-check-label a:hover {
+    text-decoration: underline;
+}
+
+/* Make the form container a bit taller to accommodate more fields */
+.card-body {
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
+
+/* Focus styles for inputs */
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+@media (max-width: 576px) {
+    .col-5, .col-7 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    .col-5 {
+        margin-top: 10px;
+    }
+}

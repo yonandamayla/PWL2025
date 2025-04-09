@@ -11,6 +11,7 @@ use App\Http\Controllers\ItemTypeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::prefix('/category')->group(function () {
@@ -29,4 +30,19 @@ Route::get('/item-type', [ItemTypeController::class, 'index']);
 Route::get('/item', [ItemController::class, 'index']);
 Route::get('/order', [OrderController::class, 'index']);
 Route::get('/order-item', [OrderItemController::class, 'index']);
+
+// Authentication Routes
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Registration Routes
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+
+// Protect routes with authentication
+Route::middleware(['auth'])->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+    // Other protected routes go here
+});
 
