@@ -10,7 +10,7 @@ class ItemModel extends Model
     use HasFactory;
     
     protected $table = 'items'; // Explicitly set the table name
-    protected $fillable = ['item_type_id', 'name', 'price', 'stock'];
+    protected $fillable = ['item_type_id', 'name', 'description', 'price', 'stock', 'photo'];
     
     public function itemType()
     {
