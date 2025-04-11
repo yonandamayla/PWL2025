@@ -1,0 +1,35 @@
+/* Custom DataTables Styling */
+.dataTables_wrapper .dataTables_length select {
+    min-width: 60px;
+    display: inline-block;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    margin-left: 5px;
+    border-radius: 4px;
+    padding: 3px 10px;
+}
+
+.table th {
+    font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.badge {
+    font-size: 85%;
+    font-weight: 500;
+    padding: 0.35em 0.6em;
+}
+
+.btn-group .btn {
+    margin: 0 2px;
+}
+
+.modal-header.bg-primary,
+.modal-header.bg-danger,
+.modal-header.bg-info {
+    color: white;
+}
