@@ -46,3 +46,12 @@ Route::middleware(['auth'])->group(function () {
     // Other protected routes go here
 });
 
+// profil
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences');
+});
+

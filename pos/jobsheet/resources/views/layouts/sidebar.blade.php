@@ -1,3 +1,8 @@
+@php
+    // Set default value for $activeMenu if not defined
+    $activeMenu = $activeMenu ?? '';
+@endphp
+
 <div class="sidebar">
     <!-- Sidebar Brand -->
     <div class="brand-container">
