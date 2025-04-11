@@ -1,0 +1,170 @@
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Header */
+.main-header {
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.main-sidebar {
+    background: none;
+    box-shadow: none;
+}
+
+/* Content area */
+.content-wrapper {
+    background-color: #f8fafc;
+}
+
+/* Cards */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: none;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #edf2f7;
+    padding: 1rem 1.25rem;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(45deg, #3490dc, #4c6ef5);
+    border: none;
+    box-shadow: 0 2px 5px rgba(52, 144, 220, 0.3);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background: linear-gradient(45deg, #2779bd, #4151ca);
+    box-shadow: 0 4px 8px rgba(52, 144, 220, 0.4);
+}
+
+/* Tables */
+.table thead th {
+    background-color: #f8fafc;
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: #4a5568;
+}
+
+/* Pagination */
+.page-item.active .page-link {
+    background-color: #3490dc;
+    border-color: #3490dc;
+}
+
+/* Footer */
+.footer-container {
+    color: #718096;
+    padding: 1rem;
+    border-top: 1px solid #edf2f7;
+    font-size: 0.9rem;
+}
+
+/* Breadcrumb styling update */
+.breadcrumb-container {
+    background-color: transparent;
+    padding: 1.5rem 1rem 0.5rem;
+}
+
+.page-title {
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin-bottom: 0;
+    position: relative;
+    display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+    .breadcrumb-container .row {
+        text-align: center;
+    }
+}
+
+/* Enhanced Footer styling */
+.footer-container {
+    color: #718096;
+    padding: 1rem;
+    border-top: 1px solid #edf2f7;
+    font-size: 0.9rem;
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.footer-container strong {
+    font-weight: 500;
+}
+
+.footer-container a {
+    color: #3490dc;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-container a:hover {
+    color: #2779bd;
+    text-decoration: none;
+}
+
+/* Footer water effect (subtle version) */
+.footer-water-effect {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0.1;
+}
+
+.footer-bubble {
+    position: absolute;
+    background: radial-gradient(circle at center, rgba(52, 144, 220, 0.2) 0%, rgba(52, 144, 220, 0) 70%);
+    border-radius: 50%;
+    animation: float-footer 15s infinite ease-in-out;
+}
+
+.footer-bubble-1 {
+    width: 100px;
+    height: 100px;
+    bottom: -50px;
+    right: 10%;
+    animation-delay: 0s;
+}
+
+.footer-bubble-2 {
+    width: 60px;
+    height: 60px;
+    bottom: -30px;
+    left: 15%;
+    animation-delay: 5s;
+}
+
+@keyframes float-footer {
+    0% {
+        transform: translateY(0);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translateY(-15px);
+        opacity: 0.1;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 0.3;
+    }
+}
