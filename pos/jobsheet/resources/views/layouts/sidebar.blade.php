@@ -10,11 +10,11 @@
             <span class="brand-text">BluePos</span>
         </a>
     </div>
-    
+
     <!-- User Panel -->
     <div class="user-panel">
         <div class="user-avatar">
-            <img src="{{ auth()->user()->profile_picture ? asset(auth()->user()->profile_picture) : asset('images/default-avatar.png') }}" 
+            <img src="{{ auth()->user()->profile_picture ? asset(auth()->user()->profile_picture) : asset('images/default-avatar.png') }}"
                 alt="User Image">
         </div>
         <div class="user-info">
@@ -64,7 +64,8 @@
             <li class="nav-section">
                 <span class="nav-section-title">PESANAN</span>
             </li>
-            <li class="nav-item {{ in_array($activeMenu, ['orders', 'create-order', 'orders-export']) ? 'active' : '' }}">
+            <li
+                class="nav-item {{ in_array($activeMenu, ['orders', 'create-order', 'orders-export']) ? 'active' : '' }}">
                 <a href="#" class="has-dropdown">
                     <i class="nav-icon fas fa-shopping-cart"></i>
                     <span>Pesanan</span>
@@ -97,7 +98,8 @@
                 </a>
             </li>
             <li class="nav-item logout">
-                <a href="{{ url('/logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <a href="{{ url('/logout') }}"
+                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i class="nav-icon fas fa-sign-out-alt"></i>
                     <span>Keluar</span>
                 </a>
@@ -107,14 +109,4 @@
             </li>
         </ul>
     </nav>
-    
-    <!-- Water Effect -->
-    <div class="sidebar-water-effect">
-        <div class="bubble bubble-1"></div>
-        <div class="bubble bubble-2"></div>
-        <div class="bubble bubble-3"></div>
-        <div class="bubble bubble-4"></div>
-        <div class="bubble bubble-5"></div>
-        <div class="bubble bubble-6"></div>
-    </div>
 </div>
