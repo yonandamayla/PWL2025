@@ -134,7 +134,6 @@
         </div>
     </div>
 
-    php
     <!-- View User Modal -->
     <div class="modal fade" id="viewUserModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
