@@ -4,7 +4,7 @@
     @section('styles')
         <link rel="stylesheet" href="{{ asset('css/users.css') }}">
     @endsection
-    
+
     @php
         $breadcrumb = (object) [
             'title' => 'Daftar Pengguna'
@@ -14,7 +14,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-light p-3 rounded">
-                <li class="breadcrumb-item"><a href="{{ url('/') }}">Data Pengguna</a></li>
+                <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Daftar Pengguna</li>
             </ol>
         </nav>
@@ -48,7 +48,6 @@
                             <th>Nama</th>
                             <th>Email</th>
                             <th>Peran</th>
-                            <th>Status</th>
                             <th width="15%">Aksi</th>
                         </tr>
                     </thead>
@@ -135,6 +134,7 @@
         </div>
     </div>
 
+    php
     <!-- View User Modal -->
     <div class="modal fade" id="viewUserModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
@@ -146,10 +146,6 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="text-center mb-3">
-                        <img id="user-avatar" src="{{ asset('images/default-avatar.png') }}" class="img-circle" width="100"
-                            height="100">
-                    </div>
                     <table class="table table-borderless">
                         <tr>
                             <th>Nama:</th>
@@ -162,10 +158,6 @@
                         <tr>
                             <th>Peran:</th>
                             <td id="view-role"></td>
-                        </tr>
-                        <tr>
-                            <th>Status:</th>
-                            <td id="view-status"></td>
                         </tr>
                         <tr>
                             <th>Terdaftar pada:</th>

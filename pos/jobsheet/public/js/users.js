@@ -32,13 +32,6 @@ $(document).ready(function () {
                     }
                 }
             },
-            {
-                data: 'is_active', name: 'is_active', render: function (data) {
-                    return data ?
-                        '<span class="badge badge-success">Active</span>' :
-                        '<span class="badge badge-danger">Inactive</span>';
-                }
-            },
             { data: 'action', name: 'action', orderable: false, searchable: false },
         ],
         language: {
@@ -177,10 +170,6 @@ $(document).ready(function () {
                 }
 
                 $('#view-role').text(roleText);
-                $('#view-status').html(user.is_active ?
-                    '<span class="badge badge-success">Active</span>' :
-                    '<span class="badge badge-danger">Inactive</span>');
-
                 $('#view-created').text(new Date(user.created_at).toLocaleDateString('id-ID'));
                 $('#viewUserModal').modal('show');
             },
