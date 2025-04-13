@@ -28,7 +28,7 @@ class UserController extends Controller
     public function index()
     {
         $breadcrumb = (object)[
-            'title' => 'Data Pengguna',
+            'title' => 'Home', 'Data Pengguna',
             'list' => [
                 'Home' => route('home'),
                 'Data Pengguna' => null

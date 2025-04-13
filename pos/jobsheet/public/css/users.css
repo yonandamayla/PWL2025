@@ -1,0 +1,20 @@
+/* User table styles */
+.badge {
+    font-size: 90%;
+}
+
+/* View user modal styles */
+.img-circle {
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* DataTables custom styling */
+div.spinner-border {
+    margin: 0 auto;
+}
+
+/* Custom styling for filter section */
+.filter-section .form-group {
+    margin-bottom: 0;
+}

@@ -5,5 +5,6 @@
                 <h1 class="page-title">{{ $breadcrumb->title ?? 'Profil' }}</h1>
             </div>
         </div>
+        
     </div>
 </section>
