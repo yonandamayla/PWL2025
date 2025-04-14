@@ -67,5 +67,31 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/items/{id}', [ItemController::class, 'update'])->name('items.update');
     Route::delete('/items/{id}', [ItemController::class, 'destroy'])->name('items.destroy');
 
-    
+    // Consolidated Transaction Management Routes
+    Route::prefix('orders')->group(function () {
+        // Consolidated view for list, details, and receipt
+        Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+        
+        // DataTables data source
+        Route::get('/list', [OrderController::class, 'getOrders'])->name('orders.list');
+
+        // Process order (admin/cashier only)
+        Route::post('/{id}/process', [OrderController::class, 'processOrder'])
+            ->middleware('check.role:1,2')
+            ->name('orders.process');
+
+        // Update order status
+        Route::post('/{id}/status', [OrderController::class, 'updateStatus'])
+            ->middleware('role:1,2')
+            ->name('orders.status.update');
+
+        // Customer routes
+        Route::get('/create', [OrderController::class, 'create'])
+            ->middleware('role:3')  // Assuming 3=customer
+            ->name('orders.create');
+
+        Route::post('/', [OrderController::class, 'store'])
+            ->middleware('role:3')
+            ->name('orders.store');
+    });
 });
