@@ -79,13 +79,6 @@
                 </a>
             </li>
             
-            <li class="nav-item {{ in_array($activeMenu, ['pending-orders']) ? 'active' : '' }}">
-                <a href="{{ url('/orders/pending') }}">
-                    <i class="nav-icon fas fa-tasks"></i>
-                    <span>Kelola Pesanan</span>
-                </a>
-            </li>
-            
             @else
             <!-- Customer Order Menu -->
             <li class="nav-item {{ in_array($activeMenu, ['create-order']) ? 'active' : '' }}">
