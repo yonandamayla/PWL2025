@@ -1,6 +1,9 @@
 @php
     // Set default value for $activeMenu if not defined
     $activeMenu = $activeMenu ?? '';
+    $isAdmin = auth()->user()->role_id === 1;
+    $isCashier = auth()->user()->role_id === 2;
+    $isCustomer = auth()->user()->role_id === 3; // Assuming role_id 3 for customers
 @endphp
 <div class="sidebar">
     <!-- Sidebar Brand -->
@@ -38,7 +41,8 @@
                 </a>
             </li>
 
-            <!-- User Management -->
+            @if($isAdmin)
+            <!-- User Management - Admin Only -->
             <li class="nav-section">
                 <span class="nav-section-title">MANAJEMEN PENGGUNA</span>
             </li>
@@ -48,8 +52,8 @@
                     <span>Daftar Pengguna</span>
                 </a>
             </li>
-
-            <!-- Item Management -->
+            
+            <!-- Item Management - Admin Only -->
             <li class="nav-section">
                 <span class="nav-section-title">BARANG</span>
             </li>
@@ -59,33 +63,45 @@
                     <span>Daftar Barang</span>
                 </a>
             </li>
+            @endif
 
-            <!-- Order Management -->
+            <!-- Transaction Management Section - Different for each role -->
             <li class="nav-section">
-                <span class="nav-section-title">PESANAN</span>
+                <span class="nav-section-title">{{ ($isAdmin || $isCashier) ? 'TRANSAKSI' : 'PESANAN' }}</span>
             </li>
-            <li
-                class="nav-item {{ in_array($activeMenu, ['orders', 'create-order', 'orders-export']) ? 'active' : '' }}">
-                <a href="#" class="has-dropdown">
-                    <i class="nav-icon fas fa-shopping-cart"></i>
-                    <span>Pesanan</span>
-                    <i class="dropdown-icon fas fa-angle-down"></i>
+
+            @if($isAdmin || $isCashier)
+            <!-- Admin and Cashier Transaction Menu -->
+            <li class="nav-item {{ in_array($activeMenu, ['orders']) ? 'active' : '' }}">
+                <a href="{{ url('/orders') }}">
+                    <i class="nav-icon fas fa-list-alt"></i>
+                    <span>Daftar Transaksi</span>
                 </a>
-                <ul class="submenu">
-                    <li class="submenu-item {{ ($activeMenu == 'create-order') ? 'active' : '' }}">
-                        <a href="{{ url('/orders/create') }}">
-                            <i class="nav-icon fas fa-cash-register"></i>
-                            <span>Buat Pesanan</span>
-                        </a>
-                    </li>
-                    <li class="submenu-item {{ ($activeMenu == 'orders') ? 'active' : '' }}">
-                        <a href="{{ url('/orders') }}">
-                            <i class="nav-icon fas fa-list-alt"></i>
-                            <span>Daftar Transaksi</span>
-                        </a>
-                    </li>
-                </ul>
             </li>
+            
+            <li class="nav-item {{ in_array($activeMenu, ['pending-orders']) ? 'active' : '' }}">
+                <a href="{{ url('/orders/pending') }}">
+                    <i class="nav-icon fas fa-tasks"></i>
+                    <span>Kelola Pesanan</span>
+                </a>
+            </li>
+            
+            @else
+            <!-- Customer Order Menu -->
+            <li class="nav-item {{ in_array($activeMenu, ['create-order']) ? 'active' : '' }}">
+                <a href="{{ url('/orders/create') }}">
+                    <i class="nav-icon fas fa-shopping-basket"></i>
+                    <span>Buat Pesanan</span>
+                </a>
+            </li>
+
+            <li class="nav-item {{ in_array($activeMenu, ['orders']) ? 'active' : '' }}">
+                <a href="{{ url('/orders') }}">
+                    <i class="nav-icon fas fa-history"></i>
+                    <span>Riwayat Pesanan</span>
+                </a>
+            </li>
+            @endif
 
             <!-- User Profile -->
             <li class="nav-section">
