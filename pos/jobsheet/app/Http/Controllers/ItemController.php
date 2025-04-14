@@ -5,221 +5,291 @@ namespace App\Http\Controllers;
 use App\Models\ItemModel;
 use App\Models\ItemTypeModel;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ItemController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return View
+     * Check if user is admin
+     */
+    public function isAdmin($user = null)
+    {
+        $user = $user ?? auth()->user();
+        return $user && $user->role_id === 1;  // Assuming role_id 1 is admin
+    }
+
+    /**
+     * Display items management page
      */
     public function index()
     {
-        // Get all item types for filtering
+        $breadcrumb = (object)[
+            'title' => 'Daftar Barang',
+            'list' => [
+                'Home' => route('home'),
+                'Daftar Barang' => null
+            ]
+        ];
+
         $itemTypes = ItemTypeModel::all();
-
-        // Get all items with their related item types
-        $items = ItemModel::with('itemType')->get();
-
-        // Set the active menu for sidebar highlighting
-        $activeMenu = 'items';
-
-        return view('items.index', compact('itemTypes', 'items', 'activeMenu'));
+        
+        return view('items.index', compact('breadcrumb', 'itemTypes'))
+            ->with('activeMenu', 'items');
     }
 
     /**
-     * Get item details for AJAX request.
-     *
-     * @param  int  $id
-     * @return JsonResponse
-     */
-    public function getItemDetails($id)
-    {
-        $item = ItemModel::with('itemType')->findOrFail($id);
-        return response()->json($item);
+ * Get all items for AJAX DataTables request
+ */
+public function list(Request $request)
+{
+    if ($request->ajax()) {
+        // Changed 'image' to 'photo' in the select statement
+        $items = ItemModel::with('itemType')->select('id', 'name', 'description', 'price', 'stock', 'photo', 'item_type_id');
+        
+        // Filter by item type if provided
+        if ($request->has('item_type_id') && !empty($request->item_type_id)) {
+            $items->where('item_type_id', $request->item_type_id);
+        }
+        
+        // Filter by stock level if provided
+        if ($request->has('stock_filter')) {
+            switch($request->stock_filter) {
+                case 'low':
+                    $items->where('stock', '<', 10);
+                    break;
+                case 'out':
+                    $items->where('stock', '=', 0);
+                    break;
+                case 'available':
+                    $items->where('stock', '>', 0);
+                    break;
+            }
+        }
+        
+        return DataTables::of($items)
+            ->addIndexColumn()
+            ->addColumn('image_url', function ($row) {
+                // Also update this to use 'photo' instead of 'image'
+                return !empty($row->photo) 
+                    ? asset($row->photo) // Using asset() directly since path includes 'storage/'
+                    : asset('images/no-image.png');
+            })
+            ->addColumn('type_name', function ($row) {
+                return $row->itemType ? $row->itemType->name : 'N/A';
+            })
+            ->addColumn('formatted_price', function ($row) {
+                return 'Rp ' . number_format($row->price, 0, ',', '.');
+            })
+            ->addColumn('stock_status', function ($row) {
+                if ($row->stock <= 0) {
+                    return '<span class="badge badge-danger">Habis</span>';
+                } elseif ($row->stock < 10) {
+                    return '<span class="badge badge-warning">Rendah</span>';
+                } else {
+                    return '<span class="badge badge-success">Tersedia</span>';
+                }
+            })
+            ->addColumn('action', function ($row) {
+                $btn = '<div class="btn-group">
+                        <button type="button" data-id="' . $row->id . '" class="btn btn-info btn-sm view-btn" title="Lihat detail">
+                            <i class="fas fa-eye"></i>
+                        </button>';
+                
+                // Only add edit/delete buttons for admin users        
+                if ($this->isAdmin()) {
+                    $btn .= '<button type="button" data-id="' . $row->id . '" class="btn btn-primary btn-sm edit-btn" title="Edit barang">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" data-id="' . $row->id . '" class="btn btn-danger btn-sm delete-btn" title="Hapus barang">
+                            <i class="fas fa-trash"></i>
+                        </button>';
+                }
+                
+                $btn .= '</div>';
+                return $btn;
+            })
+            ->rawColumns(['action', 'stock_status'])
+            ->make(true);
     }
+    
+    return abort(404);
+}
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return View
-     */
-    public function create()
-    {
-        // Get all item types for the dropdown
-        $itemTypes = ItemTypeModel::all();
-
-        // Set the active menu for sidebar highlighting
-        $activeMenu = 'items';
-
-        return view('items.create', compact('itemTypes', 'activeMenu'));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  Request  $request
-     * @return RedirectResponse
+     * Store a new item
      */
     public function store(Request $request)
-    {
-        // Validate incoming request data
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'item_type_id' => 'required|exists:item_types,id',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'description' => 'nullable|string',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Prepare item data
-        $itemData = $request->only([
-            'name',
-            'item_type_id',
-            'price',
-            'stock',
-            'description'
-        ]);
-
-        // Handle photo upload if provided
-        if ($request->hasFile('photo')) {
-            $itemData['photo'] = $this->handlePhotoUpload($request->file('photo'));
-        }
-
-        // Create new item record
-        $item = ItemModel::create($itemData);
-
-        // Flash success message to session
-        return redirect('/items')->with('success', 'Barang berhasil ditambahkan');
+{
+    if (!$this->isAdmin()) {
+        return response()->json(['error' => 'Unauthorized'], 403);
     }
 
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'price' => 'required|numeric|min:0',
+        'stock' => 'required|integer|min:0',
+        'item_type_id' => 'required|exists:item_types,id',
+        'image' => 'nullable|image|max:2048', // max 2MB
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
+    }
+
+    try {
+        $item = new ItemModel();
+        $item->name = $request->name;
+        $item->description = $request->description;
+        $item->price = $request->price;
+        $item->stock = $request->stock;
+        $item->item_type_id = $request->item_type_id;
+        
+        // Handle image upload if provided
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = Str::slug($request->name) . '_' . time() . '.' . $image->getClientOriginalExtension();
+            
+            // Store the file
+            $path = $image->storeAs('public/items', $imageName);
+            $item->photo = 'storage/items/' . $imageName; // Changed from 'image' to 'photo'
+        }
+        
+        $item->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Barang berhasil ditambahkan',
+            'data' => $item
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error creating item: ' . $e->getMessage());
+        return response()->json([
+            'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return View
+     * Get a specific item
      */
-    public function edit($id)
-    {
-        $item = ItemModel::findOrFail($id);
-        $itemTypes = ItemTypeModel::all();
+    public function show($id)
+{
+    $item = ItemModel::with('itemType')->find($id);
 
-        // Set the active menu for sidebar highlighting
-        $activeMenu = 'items';
-
-        return view('items.edit', compact('item', 'itemTypes', 'activeMenu'));
+    if (!$item) {
+        return response()->json(['error' => 'Item not found'], 404);
     }
 
+    return response()->json([
+        'data' => $item,
+        'image_url' => !empty($item->photo) 
+            ? asset($item->photo)  // Changed from 'image' to 'photo'
+            : asset('images/no-image.png')
+    ]);
+}
+
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  Request  $request
-     * @param  int  $id
-     * @return RedirectResponse
+     * Update item details
      */
     public function update(Request $request, $id)
     {
-        // Validate incoming request data
+        if (!$this->isAdmin()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+    
+        $item = ItemModel::find($id);
+    
+        if (!$item) {
+            return response()->json(['error' => 'Item not found'], 404);
+        }
+    
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'item_type_id' => 'required|exists:item_types,id',
+            'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'description' => 'nullable|string',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'item_type_id' => 'required|exists:item_types,id',
+            'image' => 'nullable|image|max:2048', // max 2MB
         ]);
-
+    
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return response()->json(['errors' => $validator->errors()], 422);
         }
-
-        // Find the item to update
-        $item = ItemModel::findOrFail($id);
-
-        // Prepare item data
-        $itemData = $request->only([
-            'name',
-            'item_type_id',
-            'price',
-            'stock',
-            'description'
-        ]);
-
-        // Handle photo upload if provided
-        if ($request->hasFile('photo')) {
-            // Delete old photo if exists
-            $this->deleteExistingPhoto($item);
-
-            // Upload new photo
-            $itemData['photo'] = $this->handlePhotoUpload($request->file('photo'));
+    
+        try {
+            $item->name = $request->name;
+            $item->description = $request->description;
+            $item->price = $request->price;
+            $item->stock = $request->stock;
+            $item->item_type_id = $request->item_type_id;
+            
+            // Handle image upload if provided
+            if ($request->hasFile('image')) {
+                // Delete old image if it exists
+                if ($item->image) {
+                    Storage::delete('public/items/' . $item->image);
+                }
+                
+                $image = $request->file('image');
+                $imageName = Str::slug($request->name) . '_' . time() . '.' . $image->getClientOriginalExtension();
+                
+                // Store the file
+                $path = $image->storeAs('public/items', $imageName);
+                $item->image = $imageName;
+            }
+            
+            $item->save();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Barang berhasil diperbarui',
+                'data' => $item
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating item: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
-
-        // Update the item
-        $item->update($itemData);
-
-        // Flash success message to session
-        return redirect('/items')->with('success', 'Barang berhasil diperbarui');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return RedirectResponse
+     * Delete an item
      */
     public function destroy($id)
     {
-        $item = ItemModel::findOrFail($id);
+        if (!$this->isAdmin()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
 
-        // Delete item's photo if exists
-        $this->deleteExistingPhoto($item);
+        $item = ItemModel::find($id);
 
-        // Delete the item
-        $item->delete();
+        if (!$item) {
+            return response()->json(['error' => 'Item not found'], 404);
+        }
 
-        // Flash success message to session
-        return redirect('/items')->with('success', 'Barang berhasil dihapus');
-    }
+        try {
+            // Delete the image if it exists
+            if ($item->image) {
+                Storage::delete('public/items/' . $item->image);
+            }
+            
+            $item->delete();
 
-    /**
-     * Handle photo upload and return the file path.
-     *
-     * @param  \Illuminate\Http\UploadedFile  $photo
-     * @return string
-     */
-    private function handlePhotoUpload($photo)
-    {
-        $filename = 'item_' . time() . '.' . $photo->getClientOriginalExtension();
-        $photo->storeAs('public/items', $filename);
-        return 'storage/items/' . $filename;
-    }
-
-    /**
-     * Delete existing photo if it exists.
-     *
-     * @param  ItemModel  $item
-     * @return void
-     */
-    private function deleteExistingPhoto(ItemModel $item)
-    {
-        if ($item->photo && Storage::exists(str_replace('storage/', 'public/', $item->photo))) {
-            Storage::delete(str_replace('storage/', 'public/', $item->photo));
+            return response()->json([
+                'success' => true,
+                'message' => 'Barang berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting item: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

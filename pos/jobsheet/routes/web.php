@@ -40,8 +40,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Basic routes
     Route::get('/role', [RoleController::class, 'index']);
-    Route::get('/item-type', [ItemTypeController::class, 'index']);
-    Route::get('/item', [ItemController::class, 'index']);
     Route::get('/order', [OrderController::class, 'index']);
     Route::get('/order-item', [OrderItemController::class, 'index']);
 
@@ -61,12 +59,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
     Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus']);
 
-    // Item management routes - using class-based controller references
+    // Item management routes 
     Route::get('/items', [ItemController::class, 'index'])->name('items.index');
-    Route::get('/items/create', [ItemController::class, 'create'])->name('items.create');
+    Route::get('/items/list', [ItemController::class, 'list'])->name('items.list');
     Route::post('/items', [ItemController::class, 'store'])->name('items.store');
-    Route::get('/items/{id}/edit', [ItemController::class, 'edit'])->name('items.edit');
+    Route::get('/items/{id}', [ItemController::class, 'show'])->name('items.show');
     Route::put('/items/{id}', [ItemController::class, 'update'])->name('items.update');
     Route::delete('/items/{id}', [ItemController::class, 'destroy'])->name('items.destroy');
-    Route::get('/items/{id}/details', [ItemController::class, 'getItemDetails'])->name('items.details');
 });
