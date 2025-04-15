@@ -23,15 +23,20 @@ Route::post('/register', [AuthController::class, 'register']);
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
-    // Dashboard
-    Route::get('/', [HomeController::class, 'index'])->name('home');
-
-    // Category routes
-    Route::prefix('/category')->group(function () {
-        Route::get('/food-beverage', [ProductController::class, 'foodBeverage']);
-        Route::get('/beauty-health', [ProductController::class, 'beautyHealth']);
-        Route::get('/home-care', [ProductController::class, 'homeCare']);
-        Route::get('/baby-kid', [ProductController::class, 'babyKid']);
+    // Dashboard - Admin and Cashier only
+    Route::get('/', [HomeController::class, 'index'])
+        ->middleware('check.role:1,2')
+        ->name('home');
+        
+    // Customer redirect after login 
+    Route::redirect('/customer', '/orders/create')->name('customer.home');
+    
+    // Redirect customers to order creation page
+    Route::get('/', function() {
+        if(auth()->user()->role_id == 3) {
+            return redirect()->route('orders.create');
+        }
+        return app()->make(HomeController::class)->index();
     });
 
     // Products and transactions
@@ -69,27 +74,20 @@ Route::middleware(['auth'])->group(function () {
 
     // Consolidated Transaction Management Routes
     Route::prefix('orders')->group(function () {
-        // Consolidated view for list, details, and receipt
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
-        
-        // DataTables data source
         Route::get('/list', [OrderController::class, 'getOrders'])->name('orders.list');
-
         // Process order (admin/cashier only)
         Route::post('/{id}/process', [OrderController::class, 'processOrder'])
             ->middleware('check.role:1,2')
             ->name('orders.process');
-
         // Update order status
         Route::post('/{id}/status', [OrderController::class, 'updateStatus'])
             ->middleware('role:1,2')
             ->name('orders.status.update');
-
         // Customer routes
         Route::get('/create', [OrderController::class, 'create'])
             ->middleware('role:3')  // Assuming 3=customer
             ->name('orders.create');
-
         Route::post('/', [OrderController::class, 'store'])
             ->middleware('role:3')
             ->name('orders.store');

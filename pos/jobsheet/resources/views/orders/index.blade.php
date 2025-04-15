@@ -283,7 +283,7 @@
                         hasOrderId: {{ isset($order_id) ? 'true' : 'false' }},
                         hasView: {{ isset($view) ? 'true' : 'false' }},
                         receiptView: {{ isset($view) && $view == 'receipt' ? 'true' : 'false' }}
-                    };
+                        };
                 </script>
                 <script src="{{ asset('js/orders.js') }}"></script>
             @endsection

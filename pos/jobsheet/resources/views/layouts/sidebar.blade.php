@@ -33,13 +33,15 @@
     <!-- Sidebar Menu -->
     <nav class="sidebar-nav">
         <ul class="nav-menu">
-            <!-- Dashboard -->
+            <!-- Dashboard - Admin and Cashier Only -->
+            @if($isAdmin || $isCashier)
             <li class="nav-item {{ ($activeMenu == 'dashboard') ? 'active' : '' }}">
                 <a href="{{ url('/') }}">
                     <i class="nav-icon fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
+            @endif
 
             @if($isAdmin)
             <!-- User Management - Admin Only -->
