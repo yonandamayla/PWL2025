@@ -48,7 +48,9 @@ public function list(Request $request)
 {
     if ($request->ajax()) {
         // Changed 'image' to 'photo' in the select statement
-        $items = ItemModel::with('itemType')->select('id', 'name', 'description', 'price', 'stock', 'photo', 'item_type_id');
+        $items = ItemModel::with('itemType')
+            ->select('id', 'name', 'description', 'price', 'stock', 'photo', 'item_type_id')
+            ->orderBy('id', 'desc'); // Add this line to sort by newest items first
         
         // Filter by item type if provided
         if ($request->has('item_type_id') && !empty($request->item_type_id)) {

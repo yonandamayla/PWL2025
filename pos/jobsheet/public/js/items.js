@@ -4,11 +4,14 @@ $(document).ready(function () {
         processing: true,
         serverSide: true,
         responsive: true,
+        order: [[0, 'desc']], // Default order by first column (DT_RowIndex) in descending order
         ajax: {
             url: ITEMS_ROUTE,
             data: function (d) {
                 d.item_type_id = $('#type-filter').val();
                 d.stock_filter = $('#stock-filter').val();
+                d.order_by = 'id'; //  ensure server knows we want to order by ID
+                d.order_direction = 'desc'; // And in descending order
             },
             error: function (xhr, error, thrown) {
                 console.error('DataTables error:', error, thrown);
