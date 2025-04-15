@@ -4,6 +4,7 @@ $(document).ready(function() {
         var table = $('#ordersTable').DataTable({
             processing: true,
             serverSide: true,
+            responsive: true,
             ajax: {
                 url: appData.ordersListUrl,
                 data: function(d) {
@@ -23,7 +24,7 @@ $(document).ready(function() {
             order: [[3, 'desc']], // Sort by date descending
             language: {
                 processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>',
-                search: "Cari:",
+                search: "<i class='fas fa-search'></i> Cari:",
                 lengthMenu: "Tampilkan _MENU_ data",
                 info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                 infoEmpty: "Tidak ada data yang ditampilkan",
@@ -31,12 +32,15 @@ $(document).ready(function() {
                 zeroRecords: "Tidak ada data yang cocok",
                 emptyTable: "Tidak ada data dalam tabel",
                 paginate: {
-                    first: "Pertama",
-                    previous: "Sebelumnya",
-                    next: "Selanjutnya",
-                    last: "Terakhir"
+                    first: "<i class='fas fa-angle-double-left'></i>",
+                    last: "<i class='fas fa-angle-double-right'></i>",
+                    next: "<i class='fas fa-angle-right'></i>",
+                    previous: "<i class='fas fa-angle-left'></i>"
                 }
-            }
+            },
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                '<"row"<"col-sm-12"tr>>' +
+                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
         });
         
         // Auto refresh on filter change
@@ -138,6 +142,6 @@ $(document).ready(function() {
     if (appData.receiptView) {
         setTimeout(function() {
             window.print();
-        }, 500);
+        }, 800); 
     }
 });
