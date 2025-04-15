@@ -37,6 +37,7 @@
 
     {{-- digunakan untuk memanggil custom css dari perintah push('css') pada masing-masing view --}}
     @stack('css')
+    @stack('styles')
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -111,8 +112,11 @@
     <script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
     <script src="{{ asset('plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('plugins/toastr/toastr.min.js') }}"></script>
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 
     @yield('scripts')
+    @stack('scripts')
 </body>
 
 </html>

@@ -23,21 +23,16 @@ Route::post('/register', [AuthController::class, 'register']);
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
-    // Dashboard - Admin and Cashier only
-    Route::get('/', [HomeController::class, 'index'])
-        ->middleware('check.role:1,2')
-        ->name('home');
-        
-    // Customer redirect after login 
-    Route::redirect('/customer', '/orders/create')->name('customer.home');
-    
-    // Redirect customers to order creation page
+    // Dashboard access with role redirection
     Route::get('/', function() {
         if(auth()->user()->role_id == 3) {
             return redirect()->route('orders.create');
         }
         return app()->make(HomeController::class)->index();
-    });
+    })->name('home');
+    
+    // Customer redirect after login 
+    Route::redirect('/customer', '/orders/create')->name('customer.home');
 
     // Products and transactions
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');

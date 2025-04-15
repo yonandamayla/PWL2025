@@ -1,0 +1,27 @@
+.card {
+    transition: transform 0.3s ease-in-out;
+    margin-bottom: 15px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.breadcrumb {
+    background-color: #f8f9fa;
+}
+
+.lead {
+    font-size: 1.2rem;
+}
+
+.stats-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Animate CSS classes for dashboard cards */
+.animate__fadeInUp {
+    animation-duration: 0.8s;
+}

@@ -24,15 +24,12 @@
         </nav>
 
         <!-- Welcome Card -->
-        <div class="card-header bg-primary text-white d-flex align-items-center">
-            <i class="fas fa-store me-3"></i> <!-- Changed me-2 to me-3 for more spacing -->
+        <div class="card-header bg-primary text-white text-center">
             <h3 class="card-title mb-0">
                 @if(Auth::user()->role_id == 1)
                     Selamat datang di BluePos, Admin!
-                @elseif(Auth::user()->role_id == 2)
-                    Selamat datang di BluePos, Kasir!
                 @else
-                    Selamat datang di BluePos!
+                    Selamat datang di BluePos, Kasir!
                 @endif
             </h3>
         </div>
@@ -49,7 +46,8 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card shadow-sm border-0 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                <div class="card shadow-sm border-0 text-center animate__animated animate__fadeInUp"
+                    style="animation-delay: 0.2s;">
                     <div class="card-body">
                         <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
                         <h5 class="card-title">Stok Rendah</h5>
@@ -58,7 +56,8 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card shadow-sm border-0 text-center animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+                <div class="card shadow-sm border-0 text-center animate__animated animate__fadeInUp"
+                    style="animation-delay: 0.3s;">
                     <div class="card-body">
                         <i class="fas fa-shopping-cart fa-2x text-success mb-3"></i>
                         <h5 class="card-title">Transaksi Hari Ini</h5>
@@ -72,8 +71,7 @@
         <div class="row mt-4">
             <div class="col-md-12">
                 <div class="card shadow-sm border-0 animate__animated animate__fadeInUp" style="animation-delay: 0.5s;">
-                    <div class="card-header bg-warning text-dark d-flex align-items-center">
-                        <i class="fas fa-exclamation-circle me-3"></i> 
+                    <div class="card-header bg-warning text-dark text-center">
                         <h5 class="card-title mb-0">Item dengan Stok Rendah</h5>
                     </div>
                     <div class="card-body">
@@ -99,9 +97,13 @@
                                                     <span class="badge bg-danger">{{ $item->stock }}</span>
                                                 </td>
                                                 <td>
-                                                    <a href="{{ url('/items/' . $item->id) }}" class="btn btn-sm btn-info">
-                                                        <i class="fas fa-edit"></i> Update
-                                                    </a>
+                                                    @if(Auth::user()->role_id == 1)
+                                                        <a href="{{ url('/items') }}" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-edit"></i> Update
+                                                        </a>
+                                                    @else
+                                                        <span class="text-muted"><small>Hanya admin</small></span>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -126,27 +128,11 @@
         </div>
     </div>
 
-    <!-- Custom CSS -->
     @push('styles')
-        <style>
-            .card {
-                transition: transform 0.3s ease-in-out;
-                margin-bottom: 15px;
-            }
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
-            }
-            .breadcrumb {
-                background-color: #f8f9fa;
-            }
-            .lead {
-                font-size: 1.2rem;
-            }
-            .stats-icon {
-                font-size: 2rem;
-                margin-bottom: 0.5rem;
-            }
-        </style>
+        <link rel="stylesheet" href="{{ asset('css/home.css') }}">
+    @endpush
+
+    @push('scripts')
+        <script src="{{ asset('js/home.js') }}"></script>
     @endpush
 @endsection
