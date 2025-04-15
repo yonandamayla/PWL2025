@@ -33,7 +33,10 @@ class HomeController extends Controller
         // Get items with low stock (threshold of 5)
         $lowStockThreshold = 5; 
         $lowStockCount = ItemModel::where('stock', '<', $lowStockThreshold)->count();
-        $lowStockItems = ItemModel::where('stock', '<', $lowStockThreshold)->take(5)->get();
+        $lowStockItems = ItemModel::where('stock', '<', $lowStockThreshold)
+        ->with('category') // This ensures the category relation is eager loaded
+        ->take(5)
+        ->get();
         
         // Get today's transactions
         $todayTransactions = OrderModel::whereDate('created_at', Carbon::today())->count();

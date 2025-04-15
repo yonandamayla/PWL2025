@@ -61,4 +61,9 @@ class ItemModel extends Model
     {
         return $this->stock > 0 && $this->stock < 10;
     }
+
+    public function category()
+{
+    return $this->belongsTo(\App\Models\ItemTypeModel::class, 'item_type_id');
+}
 }
