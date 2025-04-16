@@ -10,10 +10,11 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
-use App\Models\RoleModel; 
+use App\Models\RoleModel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -32,16 +33,17 @@ class UserController extends Controller
     public function index()
     {
         $breadcrumb = (object)[
-            'title' => 'Home', 'Data Pengguna',
+            'title' => 'Home',
+            'Data Pengguna',
             'list' => [
                 'Home' => route('home'),
                 'Data Pengguna' => null
             ]
         ];
-        
+
         return view('users.index', compact('breadcrumb'))->with('activeMenu', 'users');
     }
-    
+
 
     public function __construct()
     {
@@ -73,35 +75,42 @@ class UserController extends Controller
         if (!$this->isAdmin()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-    
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,kasir,customer', // Make sure this matches the values in your form
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-    
+
         try {
             $user = new UserModel();
             $user->name = $request->name;
             $user->email = $request->email;
             $user->password = Hash::make($request->password);
-            
+
             // Convert role string to role_id (this was missing)
-            switch($request->role) {
-                case 'admin': $user->role_id = 1; break;
-                case 'kasir': $user->role_id = 2; break;
-                case 'customer': $user->role_id = 3; break;
-                default: $user->role_id = 3; // Default to customer
+            switch ($request->role) {
+                case 'admin':
+                    $user->role_id = 1;
+                    break;
+                case 'kasir':
+                    $user->role_id = 2;
+                    break;
+                case 'customer':
+                    $user->role_id = 3;
+                    break;
+                default:
+                    $user->role_id = 3; // Default to customer
             }
-            
+
             $user->is_active = true;
             $user->save();
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Pengguna berhasil ditambahkan',
@@ -141,41 +150,48 @@ class UserController extends Controller
         if (!$this->isAdmin()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-    
+
         $user = UserModel::find($id);
-    
+
         if (!$user) {
             return response()->json(['error' => 'User not found'], 404);
         }
-    
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($id)],
             'password' => 'nullable|string|min:8',
             'role' => 'required|in:admin,kasir,customer',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-    
+
         try {
             $user->name = $request->name;
             $user->email = $request->email;
             if ($request->filled('password')) {
                 $user->password = Hash::make($request->password);
             }
-            
+
             // Convert role string to role_id
-            switch($request->role) {
-                case 'admin': $user->role_id = 1; break;
-                case 'kasir': $user->role_id = 2; break;
-                case 'customer': $user->role_id = 3; break;
-                default: $user->role_id = 3; // Default to customer
+            switch ($request->role) {
+                case 'admin':
+                    $user->role_id = 1;
+                    break;
+                case 'kasir':
+                    $user->role_id = 2;
+                    break;
+                case 'customer':
+                    $user->role_id = 3;
+                    break;
+                default:
+                    $user->role_id = 3; // Default to customer
             }
-            
+
             $user->save();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Pengguna berhasil diperbarui',
@@ -254,11 +270,11 @@ class UserController extends Controller
             // Filter by role if provided
             $role_id = $request->get('role_id');
             $users = UserModel::select(['id', 'name', 'email', 'role_id']);
-            
+
             if ($role_id) {
                 $users->where('role_id', $role_id);
             }
-            
+
             return DataTables::of($users)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
@@ -282,7 +298,7 @@ class UserController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
-        
+
         $breadcrumb = (object)[
             'title' => 'Data Pengguna',
             'list' => [
@@ -290,7 +306,7 @@ class UserController extends Controller
                 'Data Pengguna' => null
             ]
         ];
-        
+
         return view('users.list', compact('breadcrumb'))->with('activeMenu', 'users');
     }
 
@@ -299,53 +315,52 @@ class UserController extends Controller
         try {
             // Get user data
             $users = UserModel::with('role')->get();
-            
+
             // Create spreadsheet
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
-            
+
             // Set headers
             $sheet->setCellValue('A1', 'Nama');
             $sheet->setCellValue('B1', 'Email');
             $sheet->setCellValue('C1', 'Role');
             $sheet->setCellValue('D1', 'Tanggal Registrasi');
-            
+
             // Make headers bold
             $sheet->getStyle('A1:D1')->getFont()->setBold(true);
-            
+
             // Add data rows
             $row = 2;
             foreach ($users as $user) {
-                $sheet->setCellValue('A'.$row, $user->name);
-                $sheet->setCellValue('B'.$row, $user->email);
-                $sheet->setCellValue('C'.$row, $user->role->name);
-                $sheet->setCellValue('D'.$row, $user->created_at->format('d/m/Y H:i'));
+                $sheet->setCellValue('A' . $row, $user->name);
+                $sheet->setCellValue('B' . $row, $user->email);
+                $sheet->setCellValue('C' . $row, $user->role->name);
+                $sheet->setCellValue('D' . $row, $user->created_at->format('d/m/Y H:i'));
                 $row++;
             }
-            
+
             // Auto-size columns
             foreach (range('A', 'D') as $column) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
-            
+
             // Create response with Excel file
             $fileName = 'users_' . date('Y-m-d_H-i-s') . '.xlsx';
-            
+
             // Set headers for download
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $fileName . '"');
             header('Cache-Control: max-age=0');
-            
+
             // Save to output
             $writer = new Xlsx($spreadsheet);
             $writer->save('php://output');
             exit;
-            
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal mengekspor data: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Import users from Excel file
      */
@@ -361,25 +376,25 @@ class UserController extends Controller
             $spreadsheet = IOFactory::load($file->getPathname());
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray();
-            
+
             // Skip header row
             $data = array_slice($rows, 1);
             $count = 0;
-            
+
             foreach ($data as $row) {
                 if (empty($row[0]) || empty($row[1])) continue; // Skip empty rows
-                
+
                 $name = $row[0];
                 $email = $row[1];
                 $role_name = $row[2] ?? 'Customer'; // Default role
-                
+
                 // Find role ID
                 $role = RoleModel::where('name', 'like', "%{$role_name}%")->first();
                 $role_id = $role ? $role->id : 3; // Default to customer if not found
-                
+
                 // Check if user exists
                 $user = UserModel::where('email', $email)->first();
-                
+
                 if ($user) {
                     // Update existing user
                     $user->update([
@@ -397,11 +412,30 @@ class UserController extends Controller
                     $count++;
                 }
             }
-            
+
             return redirect()->back()->with('success', "Berhasil mengimport {$count} pengguna baru");
-            
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal mengimport data: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Export users data to PDF
+     */
+    public function export_pdf()
+    {
+        // Get user data to export
+        $users = UserModel::select('id', 'name', 'email', 'role_id', 'created_at')
+            ->with('role')
+            ->orderBy('id')
+            ->get();
+
+        // Load view for PDF
+        $pdf = Pdf::loadView('users.export_pdf', ['users' => $users]);
+        $pdf->setPaper('a4', 'portrait'); // Set paper size and orientation
+        $pdf->setOption("isRemoteEnabled", true); // Enable remote images
+        $pdf->render();
+
+        return $pdf->stream('Data_Users_' . date('Y-m-d_H-i-s') . '.pdf');
     }
 }

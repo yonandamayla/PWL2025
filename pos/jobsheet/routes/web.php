@@ -55,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/users/list', [UserController::class, 'list'])->name('users.list');
     Route::get('/export', [App\Http\Controllers\UserController::class, 'export'])->name('users.export');
     Route::post('/import', [App\Http\Controllers\UserController::class, 'import'])->name('users.import');
+    Route::get('/export_pdf', [UserController::class, 'export_pdf'])->name('users.export_pdf');
     Route::post('/users', [UserController::class, 'store']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);

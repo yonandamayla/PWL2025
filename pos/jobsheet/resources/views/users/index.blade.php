@@ -43,6 +43,9 @@
             <a href="{{ route('users.export') }}" class="btn btn-primary btn-sm mr-2">
                 <i class="fas fa-file-download mr-1"></i> Export Excel
             </a>
+            <a href="{{ route('users.export_pdf') }}" class="btn btn-danger btn-sm mr-2">
+                <i class="fas fa-file-pdf mr-1"></i> Export PDF
+            </a>
             <button class="btn btn-primary btn-sm" id="btn-add-user">
                 <i class="fas fa-plus-circle"></i> Tambah Pengguna
             </button>
