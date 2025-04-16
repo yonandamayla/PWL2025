@@ -99,17 +99,18 @@ class OrderController extends Controller
 
         // Different action buttons for customer vs admin/cashier
         // Inside the addColumn('actions') method in getOrders function
-
         $dt->addColumn('actions', function ($order) use ($isAdminOrCashier, $isCustomer) {
             $actions = '<div class="btn-group">';
-
+        
             // Detail button for all users
             $actions .= '<a href="' . route('orders.index', ['order_id' => $order->id]) . '" class="btn btn-sm btn-info" title="Lihat Detail"><i class="fas fa-eye"></i></a>';
-
+        
             if ($isAdminOrCashier) {
-                // Print receipt button for admin/cashier
-                $actions .= '<a href="' . route('orders.index', ['view' => 'receipt', 'order_id' => $order->id]) . '" class="btn btn-sm btn-secondary" title="Cetak Struk" target="_blank"><i class="fas fa-print"></i></a>';
-
+                // Print receipt button for admin/cashier - ONLY for non-cancelled orders
+                if ($order->status != 'cancelled') {
+                    $actions .= '<a href="' . route('orders.index', ['view' => 'receipt', 'order_id' => $order->id]) . '" class="btn btn-sm btn-secondary" title="Cetak Struk" target="_blank"><i class="fas fa-print"></i></a>';
+                }
+        
                 // Process button for pending orders (admin/cashier)
                 if ($order->status == 'pending') {
                     $actions .= '<button class="btn btn-sm btn-primary process-btn" data-id="' . $order->id . '" title="Proses Pesanan"><i class="fas fa-tasks"></i></button>';
