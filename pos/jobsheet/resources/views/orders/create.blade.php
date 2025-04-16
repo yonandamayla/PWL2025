@@ -142,12 +142,6 @@
                             <h5>Metode Pembayaran</h5>
                             <div class="payment-methods">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="payment_method" id="payment_cash" value="cash" checked>
-                                    <label class="form-check-label" for="payment_cash">
-                                        <i class="fas fa-money-bill text-success mr-1"></i> Tunai
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
                                     <input class="form-check-input" type="radio" name="payment_method" id="payment_transfer" value="transfer">
                                     <label class="form-check-label" for="payment_transfer">
                                         <i class="fas fa-university text-primary mr-1"></i> Transfer Bank
@@ -202,10 +196,6 @@
                 </div>
                 <div class="modal-body">
                     <div id="payment-cash" class="payment-option">
-                        <div class="text-center mb-4">
-                            <i class="fas fa-money-bill fa-3x text-success"></i>
-                            <h4 class="mt-2">Pembayaran Tunai</h4>
-                        </div>
                         <p>Total yang harus dibayar: <strong id="cash-total">Rp 0</strong></p>
                         <div class="form-group">
                             <label for="cash-amount">Jumlah yang dibayarkan:</label>

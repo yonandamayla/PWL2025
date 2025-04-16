@@ -26,7 +26,7 @@ class UserModel extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'role_id',
         'is_active',
         'profile_picture',
         'phone',
@@ -62,11 +62,15 @@ class UserModel extends Authenticatable
      */
     public function getRoleName()
     {
-        switch($this->role_id) {
-            case 1: return 'Admin';
-            case 2: return 'Kasir';
-            case 3: return 'Customer';
-            default: return 'Unknown';
+        switch ($this->role_id) {
+            case 1:
+                return 'Admin';
+            case 2:
+                return 'Kasir';
+            case 3:
+                return 'Customer';
+            default:
+                return 'Unknown';
         }
     }
 
@@ -106,5 +110,13 @@ class UserModel extends Authenticatable
     public function isCustomer()
     {
         return $this->role === 'customer';
+    }
+
+    /**
+     * Get the role associated with this user
+     */
+    public function role()
+    {
+        return $this->belongsTo(RoleModel::class, 'role_id');
     }
 }

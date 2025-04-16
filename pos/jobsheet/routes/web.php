@@ -53,6 +53,8 @@ Route::middleware(['auth'])->group(function () {
     // User management routes
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/list', [UserController::class, 'list'])->name('users.list');
+    Route::get('/export', [App\Http\Controllers\UserController::class, 'export'])->name('users.export');
+    Route::post('/import', [App\Http\Controllers\UserController::class, 'import'])->name('users.import');
     Route::post('/users', [UserController::class, 'store']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);

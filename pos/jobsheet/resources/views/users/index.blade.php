@@ -11,6 +11,24 @@
         ];
     @endphp
 
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle mr-2"></i> {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-light p-3 rounded">
@@ -18,10 +36,19 @@
                 <li class="breadcrumb-item active" aria-current="page">Daftar Pengguna</li>
             </ol>
         </nav>
-        <button class="btn btn-primary btn-sm" id="btn-add-user">
-            <i class="fas fa-plus-circle"></i> Tambah Pengguna
-        </button>
+        <div>
+            <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal" data-target="#importModal">
+                <i class="fas fa-file-upload mr-1"></i> Import Excel
+            </button>
+            <a href="{{ route('users.export') }}" class="btn btn-primary btn-sm mr-2">
+                <i class="fas fa-file-download mr-1"></i> Export Excel
+            </a>
+            <button class="btn btn-primary btn-sm" id="btn-add-user">
+                <i class="fas fa-plus-circle"></i> Tambah Pengguna
+            </button>
+        </div>
     </div>
+
 
     <div class="card shadow-sm">
         <div class="card-body">
@@ -170,6 +197,41 @@
             </div>
         </div>
     </div>
+
+    <!-- Import Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importModalLabel">Import Data Pengguna</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="excel_file">Pilih File Excel</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="excel_file" name="excel_file" required
+                                    accept=".xlsx, .xls">
+                                <label class="custom-file-label" for="excel_file">Pilih file...</label>
+                            </div>
+                            <small class="form-text text-muted">Format: Excel (.xlsx, .xls)</small>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-1"></i> File Excel harus memiliki kolom: nama, email, dan role.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
@@ -177,6 +239,13 @@
     <script>
         // Define variables for use in external JS file
         const USERS_ROUTE = "{{ route('users.list') }}";
+        // Show file name when selecting a file
+        $(document).ready(function () {
+            $('.custom-file-input').on('change', function () {
+                var fileName = $(this).val().split('\\').pop();
+                $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
+            });
+        });
     </script>
     <script src="{{ asset('js/users.js') }}"></script>
 @endsection

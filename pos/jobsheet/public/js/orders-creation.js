@@ -543,21 +543,14 @@ function updatePaymentModal(method) {
     
     // Update payment amounts
     const total = calculateTotal();
-    $('#cash-total').text('Rp ' + numberFormat(total));
     $('#transfer-total').text('Rp ' + numberFormat(total));
     $('#ewallet-total').text('Rp ' + numberFormat(total));
     
     // Reset fields
-    $('#cash-amount').val('');
-    $('#change-container').hide();
     $('#transfer-proof').val('');
     
-    // Enable/disable confirm button based on payment method
-    if (method === 'cash') {
-        $('#confirmPaymentBtn').prop('disabled', true);
-    } else {
-        $('#confirmPaymentBtn').prop('disabled', false);
-    }
+    // Enable confirm button for all payment methods
+    $('#confirmPaymentBtn').prop('disabled', false);
 }
 
 // Calculate total

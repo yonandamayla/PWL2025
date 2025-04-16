@@ -10,6 +10,10 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\RoleModel; 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UserController extends Controller
 {
@@ -288,5 +292,116 @@ class UserController extends Controller
         ];
         
         return view('users.list', compact('breadcrumb'))->with('activeMenu', 'users');
+    }
+
+    public function export()
+    {
+        try {
+            // Get user data
+            $users = UserModel::with('role')->get();
+            
+            // Create spreadsheet
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            
+            // Set headers
+            $sheet->setCellValue('A1', 'Nama');
+            $sheet->setCellValue('B1', 'Email');
+            $sheet->setCellValue('C1', 'Role');
+            $sheet->setCellValue('D1', 'Tanggal Registrasi');
+            
+            // Make headers bold
+            $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+            
+            // Add data rows
+            $row = 2;
+            foreach ($users as $user) {
+                $sheet->setCellValue('A'.$row, $user->name);
+                $sheet->setCellValue('B'.$row, $user->email);
+                $sheet->setCellValue('C'.$row, $user->role->name);
+                $sheet->setCellValue('D'.$row, $user->created_at->format('d/m/Y H:i'));
+                $row++;
+            }
+            
+            // Auto-size columns
+            foreach (range('A', 'D') as $column) {
+                $sheet->getColumnDimension($column)->setAutoSize(true);
+            }
+            
+            // Create response with Excel file
+            $fileName = 'users_' . date('Y-m-d_H-i-s') . '.xlsx';
+            
+            // Set headers for download
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $fileName . '"');
+            header('Cache-Control: max-age=0');
+            
+            // Save to output
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit;
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengekspor data: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Import users from Excel file
+     */
+    public function import(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls|max:2048',
+        ]);
+
+        try {
+            $file = $request->file('excel_file');
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+            
+            // Skip header row
+            $data = array_slice($rows, 1);
+            $count = 0;
+            
+            foreach ($data as $row) {
+                if (empty($row[0]) || empty($row[1])) continue; // Skip empty rows
+                
+                $name = $row[0];
+                $email = $row[1];
+                $role_name = $row[2] ?? 'Customer'; // Default role
+                
+                // Find role ID
+                $role = RoleModel::where('name', 'like', "%{$role_name}%")->first();
+                $role_id = $role ? $role->id : 3; // Default to customer if not found
+                
+                // Check if user exists
+                $user = UserModel::where('email', $email)->first();
+                
+                if ($user) {
+                    // Update existing user
+                    $user->update([
+                        'name' => $name,
+                        'role_id' => $role_id,
+                    ]);
+                } else {
+                    // Create new user with random password
+                    UserModel::create([
+                        'name' => $name,
+                        'email' => $email,
+                        'password' => Hash::make(Str::random(10)),
+                        'role_id' => $role_id,
+                    ]);
+                    $count++;
+                }
+            }
+            
+            return redirect()->back()->with('success', "Berhasil mengimport {$count} pengguna baru");
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengimport data: ' . $e->getMessage());
+        }
     }
 }
