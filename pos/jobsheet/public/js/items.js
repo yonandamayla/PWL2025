@@ -24,18 +24,18 @@ $(document).ready(function () {
         },
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-            { 
-                data: 'image_url', 
+            {
+                data: 'image_url',
                 name: 'image',
                 orderable: false,
                 searchable: false,
-                render: function(data) {
+                render: function (data) {
                     return `<div class="item-thumbnail-container">
                             <img src="${data}" class="item-thumbnail" alt="Gambar Produk" 
                                 onerror="this.onerror=null;this.src='/images/no-image.png';"
                                 onload="this.style.display='block';">
                             </div>`;
-                } 
+                }
             },
             { data: 'name', name: 'name' },
             { data: 'type_name', name: 'item_type_id' },
@@ -75,16 +75,16 @@ $(document).ready(function () {
     }
 
     // File input change handler for image preview
-    $('#image').change(function() {
+    $('#image').change(function () {
         if (this.files && this.files[0]) {
             var reader = new FileReader();
-            
-            reader.onload = function(e) {
+
+            reader.onload = function (e) {
                 $('#image-preview').attr('src', e.target.result);
             }
-            
+
             reader.readAsDataURL(this.files[0]);
-            
+
             // Update the file input label
             $('.custom-file-label').text(this.files[0].name);
         }
@@ -101,64 +101,61 @@ $(document).ready(function () {
         $('#itemModal').modal('show');
     });
 
-    // Save Item (Create or Update)
-    $('#saveItem').click(function () {
-        var id = $('#item_id').val();
-        var isUpdate = !!id;
-        var url = isUpdate ? `/items/${id}` : '/items';
-        var method = isUpdate ? 'PUT' : 'POST';
-
-        // Create FormData object to handle file uploads
-        var formData = new FormData($('#itemForm')[0]);
-        
-        // Add loading state to button
-        var $button = $(this);
-        $button.html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...').prop('disabled', true);
-
-        $.ajax({
-            url: url,
-            method: method,
-            data: formData,
-            contentType: false,
-            processData: false,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function (response) {
-                $('#itemModal').modal('hide');
-                table.ajax.reload();
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Data barang berhasil disimpan',
-                    timer: 1500
+    // Save Item (create or update)
+$('#saveItem').click(function() {
+    resetFormErrors();
+    
+    var formData = new FormData($('#itemForm')[0]);
+    var itemId = $('#item_id').val();
+    var url = itemId ? '/items/' + itemId : '/items';
+    var method = itemId ? 'POST' : 'POST';
+    
+    // If updating (itemId exists) and no new image is selected, don't send the image field
+    if (itemId && $('#image')[0].files.length === 0) {
+        formData.delete('image');
+    }
+    
+    // For PUT/PATCH requests with FormData, we need to append the _method field
+    if (itemId) {
+        formData.append('_method', 'PUT');
+    }
+    
+    $.ajax({
+        url: url,
+        type: method,
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            $('#itemModal').modal('hide');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: response.message,
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            $('#items-table').DataTable().ajax.reload();
+        },
+        error: function(xhr) {
+            if (xhr.status === 422) {
+                var errors = xhr.responseJSON.errors;
+                $.each(errors, function(key, value) {
+                    $('#' + key).addClass('is-invalid');
+                    $('#' + key + '-error').text(value[0]);
                 });
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    resetFormErrors();
-                    var errors = xhr.responseJSON.errors;
-
-                    $.each(errors, function (field, messages) {
-                        var input = $('#' + field);
-                        input.addClass('is-invalid');
-                        $('#' + field + '-error').text(messages[0]);
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Terjadi kesalahan. Silakan coba lagi.'
-                    });
-                }
-            },
-            complete: function () {
-                // Reset button state
-                $button.html('<i class="fas fa-save mr-1"></i> Simpan').prop('disabled', false);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: xhr.responseJSON.error || 'Terjadi kesalahan pada server'
+                });
             }
-        });
+        }
     });
+});
 
     // View Item details
     $('#items-table').on('click', '.view-btn', function () {
@@ -173,7 +170,7 @@ $(document).ready(function () {
                 $('#view-price').text('Rp ' + parseFloat(item.price).toLocaleString('id-ID'));
                 $('#view-category').text(item.item_type ? item.item_type.name : '-');
                 $('#view-description').text(item.description || '-');
-                
+
                 // Display stock status with badge
                 var stockHtml = item.stock;
                 if (item.stock <= 0) {
@@ -184,10 +181,10 @@ $(document).ready(function () {
                     stockHtml += ' <span class="badge badge-success">Tersedia</span>';
                 }
                 $('#view-stock').html(stockHtml);
-                
+
                 // Display image
                 $('#view-image').attr('src', response.image_url);
-                
+
                 $('#viewItemModal').modal('show');
             },
             error: function () {
@@ -205,6 +202,9 @@ $(document).ready(function () {
         var id = $(this).data('id');
         resetFormErrors();
 
+        // Reset the form before populating with new data
+        $('#itemForm')[0].reset();
+
         $.ajax({
             url: '/items/' + id,
             method: 'GET',
@@ -216,11 +216,13 @@ $(document).ready(function () {
                 $('#price').val(item.price);
                 $('#stock').val(item.stock);
                 $('#item_type_id').val(item.item_type_id);
-                
+
                 // Display current image
                 $('#image-preview').attr('src', response.image_url);
-                $('.custom-file-label').text('Ganti gambar');
-                
+                // Don't require a new image for edits
+                $('#image').removeAttr('required');
+                $('.custom-file-label').text('Ganti gambar (opsional)');
+
                 $('#itemModalLabel').text('Edit Barang');
                 $('#itemModal').modal('show');
             },

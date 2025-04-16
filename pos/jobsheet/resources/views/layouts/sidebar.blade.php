@@ -83,7 +83,7 @@
             
             @else
             <!-- Customer Order Menu -->
-            <li class="nav-item {{ in_array($activeMenu, ['create-order']) ? 'active' : '' }}">
+            <li class="nav-item {{ in_array($activeMenu, ['create-order', 'Buat pesanan']) ? 'active' : '' }}">
                 <a href="{{ url('/orders/create') }}">
                     <i class="nav-icon fas fa-shopping-basket"></i>
                     <span>Buat Pesanan</span>

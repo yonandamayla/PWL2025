@@ -24,13 +24,13 @@ Route::post('/register', [AuthController::class, 'register']);
 // Protected routes
 Route::middleware(['auth'])->group(function () {
     // Dashboard access with role redirection
-    Route::get('/', function() {
-        if(auth()->user()->role_id == 3) {
+    Route::get('/', function () {
+        if (auth()->user()->role_id == 3) {
             return redirect()->route('orders.create');
         }
         return app()->make(HomeController::class)->index();
     })->name('home');
-    
+
     // Customer redirect after login 
     Route::redirect('/customer', '/orders/create')->name('customer.home');
 
@@ -58,6 +58,11 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
     Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus']);
+
+    // Get available items for order creation -- customer
+    Route::get('/orders/items', [OrderController::class, 'getAvailableItems'])
+        ->middleware('role:3')
+        ->name('orders.items');
 
     // Item management routes 
     Route::get('/items', [ItemController::class, 'index'])->name('items.index');
