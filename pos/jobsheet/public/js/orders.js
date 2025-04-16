@@ -52,12 +52,80 @@ $(document).ready(function () {
         });
     }
 
-    // Process Order - Modified to set status directly to completed
-    $(document).on('click', '.process-btn', function () {
-        var orderId = $(this).data('id');
-        $('#orderIdInput').val(orderId);
-        $('#processModal').modal('show');
+// Process Order with SweetAlert2 confirmation - Only for admin/cashier
+$(document).on('click', '.process-btn', function () {
+    var orderId = $(this).data('id');
+    
+    Swal.fire({
+        title: 'Proses & Selesaikan Pesanan?',
+        text: "Anda akan memproses pesanan ini. Pesanan yang diproses akan segera disiapkan untuk pelanggan.",
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Proses!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+                title: 'Memproses...',
+                text: 'Mohon tunggu sebentar',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            $.ajax({
+                url: '/orders/' + orderId + '/status',
+                method: 'POST',
+                data: {
+                    _token: appData.csrfToken,
+                    status: 'completed'
+                },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Selesai!',
+                            text: 'Pesanan telah selesai diproses.',
+                            icon: 'success',
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                        
+                        // Update UI without reload if on order detail page
+                        if (appData.hasOrderId) {
+                            // Change button appearance
+                            $('.process-btn').remove();
+                            
+                            // Update status label
+                            $('.order-status').html('<span class="badge badge-success">Selesai</span>');
+                        } else {
+                            // If we're on the list view, just refresh the table row
+                            if (typeof table !== 'undefined') {
+                                table.ajax.reload(null, false);
+                            }
+                        }
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            response.message,
+                            'error'
+                        );
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire(
+                        'Error!',
+                        'Error: ' + xhr.responseJSON.message,
+                        'error'
+                    );
+                }
+            });
+        }
     });
+});
 
     // Complete Order - Only for admin/cashier
     if (appData.isAdminOrCashier) {
@@ -71,41 +139,6 @@ $(document).ready(function () {
             $('#statusModal').modal('show');
         });
     }
-
-    // Confirm Process - Modified to change status to completed
-    $('#confirmProcess').click(function () {
-        var orderId = $('#orderIdInput').val();
-
-        $.ajax({
-            url: '/orders/' + orderId + '/status',
-            method: 'POST',
-            data: {
-                _token: appData.csrfToken,
-                status: 'completed' // Directly set to completed
-            },
-            success: function (response) {
-                if (response.success) {
-                    $('#processModal').modal('hide');
-                    toastr.success('Pesanan berhasil diproses'); // Modified message
-
-                    if (appData.hasOrderId) {
-                        setTimeout(function () {
-                            location.reload();
-                        }, 1500);
-                    } else {
-                        if (typeof table !== 'undefined') {
-                            table.ajax.reload();
-                        }
-                    }
-                } else {
-                    toastr.error(response.message);
-                }
-            },
-            error: function (xhr) {
-                toastr.error('Error: ' + xhr.responseJSON.message);
-            }
-        });
-    });
 
     // Confirm Status Update
     $('#confirmStatus').click(function () {
@@ -141,102 +174,94 @@ $(document).ready(function () {
                 toastr.error('Error: ' + xhr.responseJSON.message);
             }
         });
-
-        // Add this after the existing event handlers
-
-        // Customer-specific actions
-        if (appData.isCustomer) {
-            // Cancel Order - Only for customer
-            $(document).on('click', '.cancel-btn', function () {
-                var orderId = $(this).data('id');
-
-                Swal.fire({
-                    title: 'Batalkan Pesanan?',
-                    text: "Pesanan yang dibatalkan tidak dapat dipulihkan!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, batalkan!',
-                    cancelButtonText: 'Tidak'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/orders/' + orderId + '/status',
-                            method: 'POST',
-                            data: {
-                                _token: appData.csrfToken,
-                                status: 'cancelled'
-                            },
-                            success: function (response) {
-                                if (response.success) {
-                                    toastr.success('Pesanan berhasil dibatalkan');
-
-                                    if (appData.hasOrderId) {
-                                        setTimeout(function () {
-                                            location.reload();
-                                        }, 1500);
-                                    } else {
-                                        table.ajax.reload();
-                                    }
-                                } else {
-                                    toastr.error(response.message);
-                                }
-                            },
-                            error: function (xhr) {
-                                toastr.error('Error: ' + xhr.responseJSON.message);
-                            }
-                        });
-                    }
-                });
-            });
-
-            // Mark as Received - Only for customer
-            $(document).on('click', '.received-btn', function () {
-                var orderId = $(this).data('id');
-
-                Swal.fire({
-                    title: 'Tandai Pesanan Diterima?',
-                    text: "Konfirmasi bahwa Anda telah menerima pesanan ini",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, sudah diterima!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: '/orders/' + orderId + '/status',
-                            method: 'POST',
-                            data: {
-                                _token: appData.csrfToken,
-                                status: 'completed'
-                            },
-                            success: function (response) {
-                                if (response.success) {
-                                    toastr.success('Terima kasih. Pesanan telah dikonfirmasi diterima.');
-
-                                    if (appData.hasOrderId) {
-                                        setTimeout(function () {
-                                            location.reload();
-                                        }, 1500);
-                                    } else {
-                                        table.ajax.reload();
-                                    }
-                                } else {
-                                    toastr.error(response.message);
-                                }
-                            },
-                            error: function (xhr) {
-                                toastr.error('Error: ' + xhr.responseJSON.message);
-                            }
-                        });
-                    }
-                });
-            });
-        }
     });
+
+    // Customer-specific actions
+    if (appData.isCustomer) {
+        // Cancel Order - Only for customer
+        $(document).on('click', '.cancel-btn', function () {
+            var orderId = $(this).data('id');
+
+            Swal.fire({
+                title: 'Batalkan Pesanan?',
+                text: "Pesanan yang dibatalkan tidak dapat dipulihkan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, batalkan!',
+                cancelButtonText: 'Tidak'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/orders/' + orderId + '/status',
+                        method: 'POST',
+                        data: {
+                            _token: appData.csrfToken,
+                            status: 'cancelled'
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                toastr.success('Pesanan berhasil dibatalkan');
+
+                                // Redirect to order list after cancellation
+                                setTimeout(function () {
+                                    window.location.href = '/orders';
+                                }, 1500);
+                            } else {
+                                toastr.error(response.message);
+                            }
+                        },
+                        error: function (xhr) {
+                            toastr.error('Error: ' + xhr.responseJSON.message);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Mark as Received - Only for customer
+        $(document).on('click', '.received-btn', function () {
+            var orderId = $(this).data('id');
+
+            Swal.fire({
+                title: 'Terima Pesanan?',
+                text: "Konfirmasi bahwa Anda telah menerima pesanan ini",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, sudah diterima!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/orders/' + orderId + '/status',
+                        method: 'POST',
+                        data: {
+                            _token: appData.csrfToken,
+                            status: 'completed'
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                toastr.success('Terima kasih. Pesanan telah dikonfirmasi diterima.');
+
+                                // Redirect to order list after confirmation
+                                setTimeout(function () {
+                                    window.location.href = '/orders';
+                                }, 1500);
+                            } else {
+                                toastr.error(response.message);
+                            }
+                        },
+                        error: function (xhr) {
+                            toastr.error('Error: ' + xhr.responseJSON.message);
+                        }
+                    });
+                }
+            });
+        });
+    }
 
     // Auto print when in print view
     if (appData.receiptView) {

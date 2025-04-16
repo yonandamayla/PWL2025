@@ -153,3 +153,76 @@
     display: none;
 }
 
+/* Adding styles for action buttons */
+.btn-group .received-btn {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-group .received-btn:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+/* Add an animated effect for the button when order is ready */
+.btn-group .received-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-group .received-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(30deg);
+    animation: shine 3s infinite linear;
+}
+
+/* Improved button styles for customer actions */
+.btn-group .received-btn,
+.received-btn {
+    background-color: #28a745;
+    border-color: #28a745;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-group .received-btn:hover,
+.received-btn:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+/* Add attention-grabbing animation for the Terima Pesanan button */
+.received-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(30deg);
+    animation: shine 3s infinite linear;
+}
+
+/* Enhanced animation */
+@keyframes shine {
+    0% {
+        transform: translateX(-100%) rotate(30deg);
+    }
+    100% {
+        transform: translateX(100%) rotate(30deg);
+    }
+}
+
+/* Cancel button styling */
+.btn-group .cancel-btn,
+.cancel-btn {
+    margin-right: 5px;
+}
+

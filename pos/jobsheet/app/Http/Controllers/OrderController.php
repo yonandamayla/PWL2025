@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\OrderModel;
 use App\Models\OrderItemModel;
 use App\Models\ItemModel;
-use App\Models\User;
+use App\Models\UserModel;
 use App\Models\ItemTypeModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -71,13 +71,20 @@ class OrderController extends Controller
                 return 'Rp ' . number_format($total, 0, ',', '.');
             })
             ->addColumn('status_label', function ($order) {
-                $badges = [
-                    'pending' => '<span class="badge badge-warning">Menunggu</span>',
-                    'processing' => '<span class="badge badge-info">Diproses</span>',
-                    'completed' => '<span class="badge badge-success">Selesai</span>',
-                    'cancelled' => '<span class="badge badge-danger">Dibatalkan</span>',
-                ];
-                return $badges[$order->status] ?? $order->status;
+                $status = strtolower($order->status);
+                
+                switch ($status) {
+                    case 'pending':
+                        return '<span class="badge badge-warning">Menunggu</span>';
+                    case 'processing':
+                        return '<span class="badge badge-info">Diproses</span>';
+                    case 'completed':
+                        return '<span class="badge badge-success">Selesai</span>';
+                    case 'cancelled':
+                        return '<span class="badge badge-danger">Dibatalkan</span>';
+                    default:
+                        return '<span class="badge badge-secondary">' . ucfirst($status) . '</span>';
+                }
             })
             ->addColumn('date_formatted', function ($order) {
                 return Carbon::parse($order->order_date ?? $order->created_at)->format('d M Y H:i');
@@ -91,6 +98,8 @@ class OrderController extends Controller
         }
 
         // Different action buttons for customer vs admin/cashier
+        // Inside the addColumn('actions') method in getOrders function
+
         $dt->addColumn('actions', function ($order) use ($isAdminOrCashier, $isCustomer) {
             $actions = '<div class="btn-group">';
 
@@ -101,21 +110,21 @@ class OrderController extends Controller
                 // Print receipt button for admin/cashier
                 $actions .= '<a href="' . route('orders.index', ['view' => 'receipt', 'order_id' => $order->id]) . '" class="btn btn-sm btn-secondary" title="Cetak Struk" target="_blank"><i class="fas fa-print"></i></a>';
 
-                // Complete button for processing orders
-                if ($order->status == 'processing') {
-                    $actions .= '<button class="btn btn-sm btn-success complete-btn" data-id="' . $order->id . '" title="Selesaikan Pesanan"><i class="fas fa-check"></i></button>';
+                // Process button for pending orders (admin/cashier)
+                if ($order->status == 'pending') {
+                    $actions .= '<button class="btn btn-sm btn-primary process-btn" data-id="' . $order->id . '" title="Proses Pesanan"><i class="fas fa-tasks"></i></button>';
                 }
             }
 
             if ($isCustomer) {
-                // Cancel button for pending orders
+                // Cancel button for pending orders (customer)
                 if ($order->status == 'pending') {
                     $actions .= '<button class="btn btn-sm btn-danger cancel-btn" data-id="' . $order->id . '" title="Batalkan Pesanan"><i class="fas fa-times"></i></button>';
                 }
 
-                // Mark as received button for processing orders
+                // Mark as received button for processing orders (customer)
                 if ($order->status == 'processing') {
-                    $actions .= '<button class="btn btn-sm btn-success received-btn" data-id="' . $order->id . '" title="Pesanan Diterima"><i class="fas fa-check"></i></button>';
+                    $actions .= '<button class="btn btn-sm btn-success received-btn" data-id="' . $order->id . '" title="Terima Pesanan"><i class="fas fa-check"></i></button>';
                 }
             }
 

@@ -65,10 +65,19 @@
                                         <i class="fas fa-tasks"></i> Proses Pesanan
                                     </button>
                                 @endif
-                                @if($order->status == 'processing' && (Auth::user()->role_id == 1 || Auth::user()->role_id == 2))
-                                    <button class="btn btn-sm btn-success complete-btn" data-id="{{ $order->id }}">
-                                        <i class="fas fa-check"></i> Selesaikan
-                                    </button>
+
+                                <!-- Add customer action buttons -->
+                                @if(Auth::user()->role_id == 3)
+                                    @if($order->status == 'pending')
+                                        <button class="btn btn-sm btn-danger cancel-btn" data-id="{{ $order->id }}">
+                                            <i class="fas fa-times"></i> Batalkan Pesanan
+                                        </button>
+                                    @endif
+                                    @if($order->status == 'processing')
+                                        <button class="btn btn-sm btn-success received-btn" data-id="{{ $order->id }}">
+                                            <i class="fas fa-check"></i> Terima Pesanan
+                                        </button>
+                                    @endif
                                 @endif
                             </div>
                         </div>
@@ -97,7 +106,6 @@
                                             name="status">
                                             <option value="">Semua Status</option>
                                             <option value="pending">Menunggu</option>
-                                            <option value="processing">Diproses</option>
                                             <option value="completed">Selesai</option>
                                             <option value="cancelled">Dibatalkan</option>
                                         </select>
@@ -124,9 +132,6 @@
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <!-- Data will be loaded via DataTables -->
-                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -276,21 +281,21 @@
                 </div>
 @endsection
 
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <!-- SweetAlert2 -->
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
             @section('scripts')
-                <!-- Add app data for JavaScript -->
-                <script>
-                    var appData = {
-                        ordersListUrl: "{{ route('orders.list') }}",
-                        csrfToken: "{{ csrf_token() }}",
-                        hasOrderId: {{ isset($order_id) ? 'true' : 'false' }},
-                        hasView: {{ isset($view) ? 'true' : 'false' }},
-                        receiptView: {{ isset($view) && $view == 'receipt' ? 'true' : 'false' }},
-                        isAdminOrCashier: {{ Auth::user()->role_id == 1 || Auth::user()->role_id == 2 ? 'true' : 'false' }},
-                        isCustomer: {{ Auth::user()->role_id == 3 ? 'true' : 'false' }}
-                    };
-                </script>
-                <script src="{{ asset('js/orders.js') }}"></script>
-            @endsection
+            <!-- Add app data for JavaScript -->
+            <script>
+                var appData = {
+                    ordersListUrl: "{{ route('orders.list') }}",
+                    csrfToken: "{{ csrf_token() }}",
+                    hasOrderId: {{ isset($order_id) ? 'true' : 'false' }},
+                    hasView: {{ isset($view) ? 'true' : 'false' }},
+                    receiptView: {{ isset($view) && $view == 'receipt' ? 'true' : 'false' }},
+                    isAdminOrCashier: {{ Auth::user()->role_id == 1 || Auth::user()->role_id == 2 ? 'true' : 'false' }},
+                    isCustomer: {{ Auth::user()->role_id == 3 ? 'true' : 'false' }}
+                };
+            </script>
+            <script src="{{ asset('js/orders.js') }}"></script>
+        @endsection
