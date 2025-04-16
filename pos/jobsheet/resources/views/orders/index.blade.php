@@ -114,7 +114,9 @@
                                 <tr>
                                     <th>No.</th>
                                     <th>Order ID</th>
-                                    <th>Pelanggan</th>
+                                    @if(Auth::user()->role_id == 1 || Auth::user()->role_id == 2)
+                                        <th>Pelanggan</th>
+                                    @endif
                                     <th>Tanggal</th>
                                     <th>Jumlah Item</th>
                                     <th>Total</th>
@@ -274,6 +276,9 @@
                 </div>
 @endsection
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
             @section('scripts')
                 <!-- Add app data for JavaScript -->
                 <script>
@@ -282,8 +287,10 @@
                         csrfToken: "{{ csrf_token() }}",
                         hasOrderId: {{ isset($order_id) ? 'true' : 'false' }},
                         hasView: {{ isset($view) ? 'true' : 'false' }},
-                        receiptView: {{ isset($view) && $view == 'receipt' ? 'true' : 'false' }}
-                        };
+                        receiptView: {{ isset($view) && $view == 'receipt' ? 'true' : 'false' }},
+                        isAdminOrCashier: {{ Auth::user()->role_id == 1 || Auth::user()->role_id == 2 ? 'true' : 'false' }},
+                        isCustomer: {{ Auth::user()->role_id == 3 ? 'true' : 'false' }}
+                    };
                 </script>
                 <script src="{{ asset('js/orders.js') }}"></script>
             @endsection

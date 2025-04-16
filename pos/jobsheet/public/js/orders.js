@@ -1,27 +1,30 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // Initialize DataTable - Only for list view
     if (!appData.hasOrderId && !appData.hasView) {
+        var columns = [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'order_number', name: 'id' },
+            // Conditionally include customer column only for admin or cashier
+            ...(appData.isAdminOrCashier ? [{ data: 'customer_name', name: 'user.name' }] : []),
+            { data: 'date_formatted', name: 'created_at' },
+            { data: 'items_count', name: 'items_count', searchable: false },
+            { data: 'total_formatted', name: 'total_price' },
+            { data: 'status_label', name: 'status' },
+            { data: 'actions', name: 'actions', orderable: false, searchable: false }
+        ];
+
         var table = $('#ordersTable').DataTable({
             processing: true,
             serverSide: true,
             responsive: true,
             ajax: {
                 url: appData.ordersListUrl,
-                data: function(d) {
+                data: function (d) {
                     d.status = $('#statusFilter').val();
                 }
             },
-            columns: [
-                {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-                {data: 'order_number', name: 'id'},
-                {data: 'customer_name', name: 'user.name'},
-                {data: 'date_formatted', name: 'created_at'},
-                {data: 'items_count', name: 'items_count', searchable: false},
-                {data: 'total_formatted', name: 'total_price'},
-                {data: 'status_label', name: 'status'},
-                {data: 'actions', name: 'actions', orderable: false, searchable: false}
-            ],
-            order: [[3, 'desc']], // Sort by date descending
+            columns: columns,
+            order: [[appData.isAdminOrCashier ? 3 : 2, 'desc']], // Sort by date descending, adjusting for column position
             language: {
                 processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>',
                 search: "<i class='fas fa-search'></i> Cari:",
@@ -42,35 +45,37 @@ $(document).ready(function() {
                 '<"row"<"col-sm-12"tr>>' +
                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
         });
-        
+
         // Auto refresh on filter change
-        $('#statusFilter').change(function() {
+        $('#statusFilter').change(function () {
             table.ajax.reload();
         });
     }
-    
+
     // Process Order - Modified to set status directly to completed
-    $(document).on('click', '.process-btn', function() {
+    $(document).on('click', '.process-btn', function () {
         var orderId = $(this).data('id');
         $('#orderIdInput').val(orderId);
         $('#processModal').modal('show');
     });
-    
-    // Complete Order
-    $('.complete-btn').click(function() {
-        $('#statusInput').val('completed');
-        $('#statusModal').modal('show');
-    });
-    
-    // Change Status
-    $('.status-btn').click(function() {
-        $('#statusModal').modal('show');
-    });
-    
+
+    // Complete Order - Only for admin/cashier
+    if (appData.isAdminOrCashier) {
+        $('.complete-btn').click(function () {
+            $('#statusInput').val('completed');
+            $('#statusModal').modal('show');
+        });
+
+        // Change Status - Only for admin/cashier
+        $('.status-btn').click(function () {
+            $('#statusModal').modal('show');
+        });
+    }
+
     // Confirm Process - Modified to change status to completed
-    $('#confirmProcess').click(function() {
+    $('#confirmProcess').click(function () {
         var orderId = $('#orderIdInput').val();
-        
+
         $.ajax({
             url: '/orders/' + orderId + '/status',
             method: 'POST',
@@ -78,13 +83,13 @@ $(document).ready(function() {
                 _token: appData.csrfToken,
                 status: 'completed' // Directly set to completed
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     $('#processModal').modal('hide');
                     toastr.success('Pesanan berhasil diproses'); // Modified message
-                    
+
                     if (appData.hasOrderId) {
-                        setTimeout(function() {
+                        setTimeout(function () {
                             location.reload();
                         }, 1500);
                     } else {
@@ -96,17 +101,17 @@ $(document).ready(function() {
                     toastr.error(response.message);
                 }
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 toastr.error('Error: ' + xhr.responseJSON.message);
             }
         });
     });
-    
+
     // Confirm Status Update
-    $('#confirmStatus').click(function() {
+    $('#confirmStatus').click(function () {
         var orderId = $('#statusOrderId').val();
         var status = $('#statusInput').val();
-        
+
         $.ajax({
             url: '/orders/' + orderId + '/status',
             method: 'POST',
@@ -114,13 +119,13 @@ $(document).ready(function() {
                 _token: appData.csrfToken,
                 status: status
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     $('#statusModal').modal('hide');
                     toastr.success(response.message);
-                    
+
                     if (appData.hasOrderId) {
-                        setTimeout(function() {
+                        setTimeout(function () {
                             location.reload();
                         }, 1500);
                     } else {
@@ -132,16 +137,111 @@ $(document).ready(function() {
                     toastr.error(response.message);
                 }
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 toastr.error('Error: ' + xhr.responseJSON.message);
             }
         });
+
+        // Add this after the existing event handlers
+
+        // Customer-specific actions
+        if (appData.isCustomer) {
+            // Cancel Order - Only for customer
+            $(document).on('click', '.cancel-btn', function () {
+                var orderId = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Batalkan Pesanan?',
+                    text: "Pesanan yang dibatalkan tidak dapat dipulihkan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, batalkan!',
+                    cancelButtonText: 'Tidak'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/orders/' + orderId + '/status',
+                            method: 'POST',
+                            data: {
+                                _token: appData.csrfToken,
+                                status: 'cancelled'
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    toastr.success('Pesanan berhasil dibatalkan');
+
+                                    if (appData.hasOrderId) {
+                                        setTimeout(function () {
+                                            location.reload();
+                                        }, 1500);
+                                    } else {
+                                        table.ajax.reload();
+                                    }
+                                } else {
+                                    toastr.error(response.message);
+                                }
+                            },
+                            error: function (xhr) {
+                                toastr.error('Error: ' + xhr.responseJSON.message);
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Mark as Received - Only for customer
+            $(document).on('click', '.received-btn', function () {
+                var orderId = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Tandai Pesanan Diterima?',
+                    text: "Konfirmasi bahwa Anda telah menerima pesanan ini",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, sudah diterima!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/orders/' + orderId + '/status',
+                            method: 'POST',
+                            data: {
+                                _token: appData.csrfToken,
+                                status: 'completed'
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    toastr.success('Terima kasih. Pesanan telah dikonfirmasi diterima.');
+
+                                    if (appData.hasOrderId) {
+                                        setTimeout(function () {
+                                            location.reload();
+                                        }, 1500);
+                                    } else {
+                                        table.ajax.reload();
+                                    }
+                                } else {
+                                    toastr.error(response.message);
+                                }
+                            },
+                            error: function (xhr) {
+                                toastr.error('Error: ' + xhr.responseJSON.message);
+                            }
+                        });
+                    }
+                });
+            });
+        }
     });
-    
+
     // Auto print when in print view
     if (appData.receiptView) {
-        setTimeout(function() {
+        setTimeout(function () {
             window.print();
-        }, 800); 
+        }, 800);
     }
 });

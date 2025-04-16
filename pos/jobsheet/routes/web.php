@@ -72,6 +72,10 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/items/{id}', [ItemController::class, 'update'])->name('items.update');
     Route::delete('/items/{id}', [ItemController::class, 'destroy'])->name('items.destroy');
 
+    // Direct access routes for AJAX calls
+    Route::post('/orders/{order}/process', [OrderController::class, 'processOrder'])->name('orders.process');
+    Route::post('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+
     // Consolidated Transaction Management Routes
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');

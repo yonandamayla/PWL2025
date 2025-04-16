@@ -44,30 +44,21 @@ class OrderController extends Controller
     public function getOrders(Request $request)
     {
         $query = OrderModel::with(['user', 'orderItems.item']);
+        $isCustomer = Auth::user()->role_id == 3;
+        $isAdminOrCashier = Auth::user()->role_id == 1 || Auth::user()->role_id == 2;
 
         // Apply filters if present
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
         }
 
-        if ($request->has('date_from') && $request->date_from) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->has('date_to') && $request->date_to) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
         // Filter for customer - only show their own orders
-        if (Auth::user()->role_id == 3) {
+        if ($isCustomer) {
             $query->where('user_id', Auth::id());
         }
 
-        return DataTables::of($query)
+        $dt = DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('customer_name', function ($order) {
-                return $order->user->name;
-            })
             ->addColumn('order_number', function ($order) {
                 // Generate order number on-the-fly based on ID
                 return 'ORD-' . str_pad($order->id, 5, '0', STR_PAD_LEFT);
@@ -90,22 +81,51 @@ class OrderController extends Controller
             })
             ->addColumn('date_formatted', function ($order) {
                 return Carbon::parse($order->order_date ?? $order->created_at)->format('d M Y H:i');
-            })
-            ->addColumn('actions', function ($order) {
-                $actions = '<div class="btn-group">';
-                $actions .= '<a href="' . route('orders.index', ['order_id' => $order->id]) . '" class="btn btn-sm btn-info" title="Lihat Detail"><i class="fas fa-eye"></i></a>';
+            });
+
+        // Add customer_name column only for admin or cashier
+        if ($isAdminOrCashier) {
+            $dt->addColumn('customer_name', function ($order) {
+                return $order->user->name;
+            });
+        }
+
+        // Different action buttons for customer vs admin/cashier
+        $dt->addColumn('actions', function ($order) use ($isAdminOrCashier, $isCustomer) {
+            $actions = '<div class="btn-group">';
+
+            // Detail button for all users
+            $actions .= '<a href="' . route('orders.index', ['order_id' => $order->id]) . '" class="btn btn-sm btn-info" title="Lihat Detail"><i class="fas fa-eye"></i></a>';
+
+            if ($isAdminOrCashier) {
+                // Print receipt button for admin/cashier
                 $actions .= '<a href="' . route('orders.index', ['view' => 'receipt', 'order_id' => $order->id]) . '" class="btn btn-sm btn-secondary" title="Cetak Struk" target="_blank"><i class="fas fa-print"></i></a>';
 
-                // Show process button only for pending orders to admin/cashier
-                if ($order->status == 'pending' && (Auth::user()->role_id == 1 || Auth::user()->role_id == 2)) {
-                    $actions .= '<button class="btn btn-sm btn-primary process-btn" data-id="' . $order->id . '" title="Proses Pesanan"><i class="fas fa-tasks"></i></button>';
+                // Complete button for processing orders
+                if ($order->status == 'processing') {
+                    $actions .= '<button class="btn btn-sm btn-success complete-btn" data-id="' . $order->id . '" title="Selesaikan Pesanan"><i class="fas fa-check"></i></button>';
+                }
+            }
+
+            if ($isCustomer) {
+                // Cancel button for pending orders
+                if ($order->status == 'pending') {
+                    $actions .= '<button class="btn btn-sm btn-danger cancel-btn" data-id="' . $order->id . '" title="Batalkan Pesanan"><i class="fas fa-times"></i></button>';
                 }
 
-                $actions .= '</div>';
-                return $actions;
-            })
-            ->rawColumns(['status_label', 'actions'])
-            ->make(true);
+                // Mark as received button for processing orders
+                if ($order->status == 'processing') {
+                    $actions .= '<button class="btn btn-sm btn-success received-btn" data-id="' . $order->id . '" title="Pesanan Diterima"><i class="fas fa-check"></i></button>';
+                }
+            }
+
+            $actions .= '</div>';
+            return $actions;
+        });
+
+        $dt->rawColumns(['status_label', 'actions']);
+
+        return $dt->make(true);
     }
 
     /**
