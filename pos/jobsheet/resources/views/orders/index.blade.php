@@ -279,23 +279,95 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Order Details Modal -->
+                <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="orderDetailsModalLabel">Detail Pesanan</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center mb-3" id="orderDetailsLoading">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Memuat detail pesanan...</p>
+                                </div>
+
+                                <div id="orderDetailsContent" style="display: none;">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <p><strong>No. Pesanan:</strong> <span id="orderNumber"></span></p>
+                                            <p><strong>Pelanggan:</strong> <span id="customerName"></span></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>Tanggal:</strong> <span id="orderDate"></span></p>
+                                            <p><strong>Status:</strong> <span id="orderStatus"></span></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th class="text-right">Jumlah</th>
+                                                    <th class="text-right">Harga</th>
+                                                    <th class="text-right">Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="orderItemsList">
+                                                <!-- Items will be loaded dynamically -->
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="3" class="text-right"><strong>Subtotal</strong></td>
+                                                    <td class="text-right" id="orderSubtotal"></td>
+                                                </tr>
+                                                <tr id="discountRow" style="display: none;">
+                                                    <td colspan="3" class="text-right"><strong>Diskon</strong></td>
+                                                    <td class="text-right" id="orderDiscount"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="3" class="text-right"><strong>Total Bayar</strong></td>
+                                                    <td class="text-right" id="orderTotal"></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+
+                                <!-- Order action buttons will appear here based on status -->
+                                <div id="orderModalActions"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 @endsection
 
             <!-- SweetAlert2 -->
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
             @section('scripts')
-            <!-- Add app data for JavaScript -->
-            <script>
-                var appData = {
-                    ordersListUrl: "{{ route('orders.list') }}",
-                    csrfToken: "{{ csrf_token() }}",
-                    hasOrderId: {{ isset($order_id) ? 'true' : 'false' }},
-                    hasView: {{ isset($view) ? 'true' : 'false' }},
-                    receiptView: {{ isset($view) && $view == 'receipt' ? 'true' : 'false' }},
-                    isAdminOrCashier: {{ Auth::user()->role_id == 1 || Auth::user()->role_id == 2 ? 'true' : 'false' }},
-                    isCustomer: {{ Auth::user()->role_id == 3 ? 'true' : 'false' }}
-                };
-            </script>
-            <script src="{{ asset('js/orders.js') }}"></script>
-        @endsection
+                <!-- Add app data for JavaScript -->
+                <script>
+                    var appData = {
+                        ordersListUrl: "{{ route('orders.list') }}",
+                        csrfToken: "{{ csrf_token() }}",
+                        hasOrderId: {{ isset($order_id) ? 'true' : 'false' }},
+                        hasView: {{ isset($view) ? 'true' : 'false' }},
+                        receiptView: {{ isset($view) && $view == 'receipt' ? 'true' : 'false' }},
+                        isAdminOrCashier: {{ Auth::user()->role_id == 1 || Auth::user()->role_id == 2 ? 'true' : 'false' }},
+                        isCustomer: {{ Auth::user()->role_id == 3 ? 'true' : 'false' }}
+                    };
+                </script>
+                <script src="{{ asset('js/orders.js') }}"></script>
+            @endsection

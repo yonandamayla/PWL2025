@@ -72,7 +72,7 @@ class OrderController extends Controller
             })
             ->addColumn('status_label', function ($order) {
                 $status = strtolower($order->status);
-                
+
                 switch ($status) {
                     case 'pending':
                         return '<span class="badge badge-warning">Menunggu</span>';
@@ -101,16 +101,16 @@ class OrderController extends Controller
         // Inside the addColumn('actions') method in getOrders function
         $dt->addColumn('actions', function ($order) use ($isAdminOrCashier, $isCustomer) {
             $actions = '<div class="btn-group">';
-        
-            // Detail button for all users
-            $actions .= '<a href="' . route('orders.index', ['order_id' => $order->id]) . '" class="btn btn-sm btn-info" title="Lihat Detail"><i class="fas fa-eye"></i></a>';
-        
+
+            // Detail button - changed to use a button with data attributes instead of a link
+            $actions .= '<button class="btn btn-sm btn-info view-details-btn" data-id="' . $order->id . '" title="Lihat Detail"><i class="fas fa-eye"></i></button>';
+
             if ($isAdminOrCashier) {
                 // Print receipt button for admin/cashier - ONLY for non-cancelled orders
                 if ($order->status != 'cancelled') {
                     $actions .= '<a href="' . route('orders.index', ['view' => 'receipt', 'order_id' => $order->id]) . '" class="btn btn-sm btn-secondary" title="Cetak Struk" target="_blank"><i class="fas fa-print"></i></a>';
                 }
-        
+
                 // Process button for pending orders (admin/cashier)
                 if ($order->status == 'pending') {
                     $actions .= '<button class="btn btn-sm btn-primary process-btn" data-id="' . $order->id . '" title="Proses Pesanan"><i class="fas fa-tasks"></i></button>';
@@ -136,6 +136,46 @@ class OrderController extends Controller
         $dt->rawColumns(['status_label', 'actions']);
 
         return $dt->make(true);
+    }
+
+    /**
+     * Get order details for modal view
+     */
+    public function getOrderDetails($id)
+    {
+        $order = OrderModel::with(['user', 'orderItems.item'])->findOrFail($id);
+        $orderNumber = 'ORD-' . str_pad($order->id, 6, '0', STR_PAD_LEFT);
+
+        // Format items for display
+        $items = $order->orderItems->map(function ($item) {
+            return [
+                'name' => $item->item->name,
+                'quantity' => $item->quantity,
+                'price' => number_format($item->item->price, 0, ',', '.'),
+                'subtotal' => number_format($item->subtotal, 0, ',', '.')
+            ];
+        });
+
+        // Calculate total with discount
+        $subtotal = $order->total_price;
+        $discount = $order->discount > 0 ? ($order->total_price * $order->discount / 100) : 0;
+        $finalTotal = $subtotal - $discount;
+
+        return response()->json([
+            'success' => true,
+            'order' => [
+                'id' => $order->id,
+                'orderNumber' => $orderNumber,
+                'customer' => $order->user->name,
+                'date' => Carbon::parse($order->order_date ?? $order->created_at)->format('d/m/Y H:i'),
+                'status' => $order->status,
+                'items' => $items,
+                'subtotal' => number_format($subtotal, 0, ',', '.'),
+                'discount' => $order->discount,
+                'discountAmount' => number_format($discount, 0, ',', '.'),
+                'finalTotal' => number_format($finalTotal, 0, ',', '.')
+            ]
+        ]);
     }
 
     /**

@@ -80,6 +80,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/list', [OrderController::class, 'getOrders'])->name('orders.list');
+        Route::get('/{id}/details', [OrderController::class, 'getOrderDetails'])->name('orders.details');
         // Process order (admin/cashier only)
         Route::post('/{id}/process', [OrderController::class, 'processOrder'])
             ->middleware('check.role:1,2')
