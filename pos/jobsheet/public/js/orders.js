@@ -344,15 +344,6 @@ $(document).on('click', '.view-details-btn', function () {
 
                 // Add action buttons based on status and user role
                 if (appData.isAdminOrCashier) {
-                    // Admin/Cashier actions
-                    if (order.status == 'pending') {
-                        $('#orderModalActions').append(
-                            '<button class="btn btn-primary modal-process-btn" data-id="' + orderId + '">' +
-                            '<i class="fas fa-tasks"></i> Proses Pesanan' +
-                            '</button>'
-                        );
-                    }
-
                     // Add receipt printing for non-cancelled orders
                     if (order.status != 'cancelled') {
                         $('#orderModalActions').append(
