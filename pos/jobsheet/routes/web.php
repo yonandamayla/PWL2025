@@ -65,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
     // Get available items for order creation -- customer
     Route::get('/orders/items', [OrderController::class, 'getAvailableItems'])
         ->middleware('role:3')
-        ->name('orders.items');
+        ->name('orders.items'); 
 
     // Item management routes 
     Route::get('/items', [ItemController::class, 'index'])->name('items.index');

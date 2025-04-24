@@ -27,7 +27,8 @@ class OrderController extends Controller
 
         // If order_id is provided, fetch the order details
         if ($order_id) {
-            $order = OrderModel::findOrFail($order_id);
+            $order = OrderModel::findOrFail($order_id); 
+
             // Generate an order number (or retrieve it from the database)
             $orderNumber = 'ORD-' . str_pad($order->id, 6, '0', STR_PAD_LEFT);
 
