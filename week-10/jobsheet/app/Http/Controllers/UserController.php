@@ -12,6 +12,7 @@ use Yajra\DataTables\Facades\DataTables;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 
 class UserController extends Controller
@@ -500,34 +501,34 @@ class UserController extends Controller
         return $pdf->stream('Data User' . date('Y-m-d_H-i-s') . '.pdf');
     }
 
-/**
- * Show the user profile page
- */
-public function profile() 
-{
-    // Use Laravel's auth system to get the current user
-    $user = auth()->user();
+    /**
+     * Show the user profile page
+     */
+    public function profile()
+    {
+        // Use Laravel's auth system to get the current user
+        $user = auth()->user();
 
-    if (!$user) {
-        return redirect('/login')->with('error', 'Silahkan login terlebih dahulu');
+        if (!$user) {
+            return redirect('/login')->with('error', 'Silahkan login terlebih dahulu');
+        }
+
+        // Define breadcrumb as an OBJECT (note the (object) cast)
+        $breadcrumb = (object) [
+            'title' => 'Profile User',
+            'list' => ['Home', 'Profile']
+        ];
+
+        // Define page information
+        $page = (object) [
+            'title' => 'Profil Pengguna'
+        ];
+
+        // Set active menu
+        $activeMenu = 'profile';
+
+        return view('user.profile', compact('user', 'breadcrumb', 'page', 'activeMenu'));
     }
-
-    // Define breadcrumb as an OBJECT (note the (object) cast)
-    $breadcrumb = (object) [
-        'title' => 'Profile User',
-        'list' => ['Home', 'Profile']
-    ];
-
-    // Define page information
-    $page = (object) [
-        'title' => 'Profil Pengguna'
-    ];
-
-    // Set active menu
-    $activeMenu = 'profile';
-
-    return view('user.profile', compact('user', 'breadcrumb', 'page', 'activeMenu'));
-}
 
     /**
      * Update user profile photo
@@ -557,22 +558,53 @@ public function profile()
                 return redirect('/login')->with('error', 'User tidak ditemukan');
             }
 
+            // Check if file exists
+            if (!$request->hasFile('foto_profile') || !$request->file('foto_profile')->isValid()) {
+                return redirect()->back()->with('error', 'File tidak valid atau tidak ditemukan');
+            }
+
             // Delete old photo if exists
-            if ($userModel->foto_profile && file_exists(storage_path('app/public/' . $userModel->foto_profile))) {
+            if ($userModel->foto_profile && Storage::disk('public')->exists($userModel->foto_profile)) {
                 Storage::disk('public')->delete($userModel->foto_profile);
             }
 
-            // Store new photo
-            $fileName = 'profile_' . $userId . '_' . time() . '.' . $request->foto_profile->extension();
-            $path = $request->foto_profile->storeAs('profiles', $fileName, 'public');
+            // Store new photo with improved error handling
+            $file = $request->file('foto_profile');
+            $fileName = 'profile_' . $userId . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+            // Log file information for debugging
+            Log::info('Profile upload: ' . $fileName);
+
+            $path = $file->storeAs('profiles', $fileName, 'public');
+            Log::info('Stored path: ' . $path);
+
+            // Verify that the file was stored successfully
+            if (!Storage::disk('public')->exists($path)) {
+                Log::error('Storage verification failed for: ' . $path);
+                return redirect()->back()->with('error', 'Gagal menyimpan file ke storage');
+            }
 
             // Update user record using update() method
-            UserModel::where('user_id', $userId)->update([
+            $updated = UserModel::where('user_id', $userId)->update([
                 'foto_profile' => $path
             ]);
 
-            return redirect()->back()->with('success', 'Foto profile berhasil diperbarui');
+            if (!$updated) {
+                Storage::disk('public')->delete($path); // Clean up if DB update fails
+                Log::error('Database update failed for user: ' . $userId);
+                return redirect()->back()->with('error', 'Gagal memperbarui data profil');
+            }
+
+            // Force refresh of user data
+            $userModel->refresh();
+            Log::info('New profile path: ' . $userModel->foto_profile);
+
+            // Refresh user session data
+            auth()->setUser(UserModel::find($userId));
+
+            return redirect()->back()->with('success', 'Foto profil berhasil diperbarui');
         } catch (\Exception $e) {
+            Log::error('Profile upload exception: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal mengupload foto: ' . $e->getMessage());
         }
     }

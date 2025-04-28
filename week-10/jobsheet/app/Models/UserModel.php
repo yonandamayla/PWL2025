@@ -3,14 +3,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Foundation\Auth\User as Authenticatable; //impelemntasi auth
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Foundation\Auth\User as Authenticatable; 
 
-class UserModel extends Authenticatable
+class UserModel extends Authenticatable implements JWTSubject
 {
+    public function getJWTIdentifier(): string|int
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims(): array
+    {
+        return [];
+    }
+
     use HasFactory;
     protected $table = 'm_user';
     protected $primaryKey = 'user_id';
-    protected $fillable = ['user_id, username', 'password', 'nama', 'level_id', 'created_at', 'updated_at', 'foto_profile'];
+    protected $fillable = ['username', 'nama', 'password', 'level_id', 'created_at', 'updated_at', 'foto_profile'];
     protected $hidden = ['password']; // Jangan ditampilkan saat select
     protected $casts = ['password' => 'hashed']; // Casting password agar otomatis di-hash
 
