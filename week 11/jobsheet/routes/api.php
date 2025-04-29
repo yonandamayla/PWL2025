@@ -60,3 +60,6 @@ Route::middleware('auth:api')->group(function() {
     Route::put('/barang/{id}', [BarangController::class, 'update']);
     Route::delete('/barang/{id}', [BarangController::class, 'destroy']);
 });
+
+// jb 11
+Route::post('/register1', \App\Http\Controllers\Api\RegisterController::class)->name('register1');

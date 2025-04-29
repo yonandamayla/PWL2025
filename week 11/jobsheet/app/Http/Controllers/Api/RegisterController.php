@@ -11,17 +11,24 @@ class RegisterController extends Controller
 {
     public function __invoke(Request $request)
     {
-        //set validator
-        $validator = Validator::make($request->all(), [
+        //set validation
+        $validation = Validator::make($request->all(), [
             'username' => 'required',
             'nama' => 'required',
             'password' => 'required|min:5|confirmed',
-            'level_id' => 'required'
+            'level_id' => 'required',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        //if validations fails
-        if($validator->fails()){
-            return response()->json($validator->errors(), 422);
+        //handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $image->store('images', 'public');
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Image upload failed',
+            ], 400);
         }
 
         //create user
@@ -30,10 +37,11 @@ class RegisterController extends Controller
             'nama' => $request->nama,
             'password' => bcrypt($request->password),
             'level_id' => $request->level_id,
+            'image' => $image->hashName(),
         ]);
 
         //return response JSON user is created
-        if($user) {
+        if ($user) {
             return response()->json([
                 'success' => true,
                 'user' => $user,
