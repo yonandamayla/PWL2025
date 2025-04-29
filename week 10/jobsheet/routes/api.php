@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\LevelController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,8 +24,19 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('/logout', \App\Http\Controllers\Api\LogoutController::class)->name('logout');
 
 // level
-Route::get('levels', [LevelController::class, 'index']); 
-Route::post('levels', [LevelController::class, 'store']);
-Route::get('levels/{level}', [LevelController::class, 'show']);
-Route::put('levels/{level}', [LevelController::class, 'update']);
-Route::delete('levels/{level}', [LevelController::class, 'destroy']);
+Route::middleware('auth:api')->group(function () {
+    Route::get('levels', [LevelController::class, 'index']);
+    Route::post('levels', [LevelController::class, 'store']);
+    Route::get('levels/{level}', [LevelController::class, 'show']);
+    Route::put('levels/{level}', [LevelController::class, 'update']);
+    Route::delete('levels/{level}', [LevelController::class, 'destroy']);
+});
+
+// user
+Route::middleware('auth:api')->group(function() {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+});
