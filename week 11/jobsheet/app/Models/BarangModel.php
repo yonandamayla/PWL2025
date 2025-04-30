@@ -18,7 +18,8 @@ class BarangModel extends Model
         'barang_nama', 
         'harga_beli',  
         'harga_jual',  
-        'kategori_id'
+        'kategori_id',
+        'image'
     ];
 
     /**
@@ -27,5 +28,16 @@ class BarangModel extends Model
     public function kategori(): BelongsTo
     {
         return $this->belongsTo(KategoriModel::class, 'kategori_id', 'kategori_id');
+    }
+    
+    /**
+     * Get image URL attribute
+     */
+    public function getImageUrlAttribute()
+    {
+        if ($this->image) {
+            return asset('storage/barang/' . $this->image);
+        }
+        return null;
     }
 }

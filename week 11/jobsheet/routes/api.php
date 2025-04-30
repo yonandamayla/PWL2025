@@ -63,3 +63,6 @@ Route::middleware('auth:api')->group(function() {
 
 // jb 11
 Route::post('/register1', \App\Http\Controllers\Api\RegisterController::class)->name('register1');
+
+Route::post('/barang/upload', [App\Http\Controllers\Api\BarangController::class, 'upload']);
+Route::get('/barang/{id?}', [App\Http\Controllers\Api\BarangController::class, 'getBarang']);
